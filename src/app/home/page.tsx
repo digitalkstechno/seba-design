@@ -4,7 +4,6 @@ import { FaEye, FaFacebookF, FaInstagram } from "react-icons/fa";
 import { BsShare, BsGlobe } from "react-icons/bs";
 import { AiOutlineHome } from "react-icons/ai";
 import { FiSearch } from "react-icons/fi";
-import { MdEvent } from "react-icons/md";
 import { LuLayoutDashboard } from "react-icons/lu"; // Dropbox icon mate substitute
 import { useRouter } from "next/navigation";
 
@@ -13,8 +12,8 @@ const Home = () => {
     const menu = [
         { label: 'Associated', img: 'https://cdn-icons-png.flaticon.com/512/1055/1055644.png', path: '/accociated' },
         { label: 'Members', img: 'https://cdn-icons-png.flaticon.com/512/33/33308.png', path: '/member' },
-        { label: 'New Member', img: 'https://cdn-icons-png.flaticon.com/512/1250/1250592.png', },
-        { label: 'Search', icon: <FiSearch className="text-red-600 text-lg" />, }
+        { label: 'New Member', img: 'https://cdn-icons-png.flaticon.com/512/1250/1250592.png', path: '/newMember' },
+        { label: 'Search', icon: <FiSearch className="text-red-600 text-lg" />, path: '/search' }
     ];
     return (
         <div className="h-screen bg-[#d9d9d9] flex justify-center items-start ">
@@ -57,7 +56,6 @@ const Home = () => {
 
                 {/* Floating Social Media Tabs - EXACT MATCH */}
                 <div className="absolute right-[-18px] top-[180px] flex flex-col items-end gap-[30px]">
-
                     {/* Facebook */}
                     <div className="relative z-30 flex items-center bg-[#3bb2e6] text-white pl-2 pr-6 py-1.5 rounded-l-full shadow-lg transform -rotate-[14deg] origin-right">
                         <div className="bg-white rounded-full w-[26px] h-[26px] flex items-center justify-center">
@@ -65,7 +63,6 @@ const Home = () => {
                         </div>
                         <span className="text-[13px] font-semibold italic ml-2">facebook</span>
                     </div>
-
                     {/* Instagram */}
                     <div className="relative z-20 -mt-5 flex items-center bg-gradient-to-r from-yellow-400 via-pink-500 to-red-500 text-white pl-2 pr-6 py-1.5 rounded-l-full shadow-lg transform -rotate-[14deg] origin-right">
                         <div className="bg-white rounded-full w-[26px] h-[26px] flex items-center justify-center">
@@ -73,7 +70,6 @@ const Home = () => {
                         </div>
                         <span className="text-[13px] font-semibold italic ml-2">instagram</span>
                     </div>
-
                     {/* Events */}
                     <div className="relative z-10 -mt-5 flex items-center bg-green-600 text-white pl-2 pr-6 py-1.5 rounded-l-full shadow-lg transform -rotate-[14deg] origin-right">
                         <div className="bg-black rounded-full w-[26px] h-[26px] flex items-center justify-center">
@@ -81,8 +77,11 @@ const Home = () => {
                         </div>
                         <span className="text-[13px] font-semibold italic ml-2 text-cyan-300">events</span>
                     </div>
-
                 </div>
+
+
+
+
                 <div className="grid grid-cols-4 gap-4 mt-8 justify-items-center">
                     {menu.map((item, idx) => (
                         <div
@@ -91,7 +90,7 @@ const Home = () => {
                             className="flex flex-col items-center cursor-pointer"
                         >
 
-                            <div className="bg-gray-200/70 rounded-lg w-[60px] h-[60px] flex justify-center items-center shadow-sm border border-gray-100 hover:bg-gray-300 transition">
+                            <div className="bg-gray-200/70 rounded-lg w-[50px] h-[50px] flex justify-center items-center shadow-sm border border-gray-100 hover:bg-gray-300 transition">
                                 {item.img ? (
                                     <img src={item.img} alt={item.label} className="h-6 w-6 object-contain" />
                                 ) : (
@@ -112,12 +111,12 @@ const Home = () => {
                 {/* Sponsor Section */}
                 <div className="text-center mt-6 px-4">
                     <p className="text-[14px] text-gray-600 font-medium">:: Sponsor ::</p>
-                    <div className="bg-[#003d3d] rounded-2xl py-5 mt-2 shadow-inner ">
-                        <div className="flex justify-center mb-1">
-                            <div className="text-yellow-500 text-2xl">❖</div>
-                        </div>
-                        <h2 className="text-yellow-500 font-bold text-2xl tracking-[0.2em]">ANANTA</h2>
-                        <p className="text-white text-xs tracking-[0.4em] mt-1">HEIGHTS</p>
+                    <div className="bg-[#003d3d] rounded-2xl py-6 mt-2 shadow-inner flex justify-center">
+                        <img
+                            src="/images/ananta-height.png"
+                            alt="ANANTA"
+                            className="h-[90px] object-contain"
+                        />
                     </div>
                 </div>
 
@@ -129,10 +128,12 @@ const Home = () => {
                     </div>
 
                     <div className="flex flex-col items-center cursor-pointer opacity-90 hover:opacity-100">
-                        <div className="bg-white rounded-sm p-[2px]">
-                            <div className="w-4 h-4 bg-red-600 rounded-sm"></div>
-                        </div>
-                        <span className="text-[10px] mt-1">app link</span>
+                        <img
+                            src="/images/seba-link1.png"  
+                            alt="home"
+                            className="w-8 h-8  object-contain"
+                        />
+                        <span className="text-[10px] -mt-1 ">App Link</span>
                     </div>
 
                     <div className="flex flex-col items-center cursor-pointer opacity-90 hover:opacity-100">
@@ -145,10 +146,12 @@ const Home = () => {
                         <span className="text-[10px] mt-1">dropbox</span>
                     </div>
 
-                    <div className="flex flex-col items-center cursor-pointer opacity-90 hover:opacity-100">
+                    <button
+                        onClick={() => router.push('/advertisement')}
+                        className="flex flex-col items-center cursor-pointer opacity-90 hover:opacity-100">
                         <BsShare className="text-lg" />
                         <span className="text-[10px] mt-1">share</span>
-                    </div>
+                    </button>
                 </div>
 
             </div>
