@@ -1,15 +1,34 @@
 "use client";
 
-import { FC, FormEvent } from "react";
+import { FC, FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { FaUser, FaMobileAlt, FaPlay } from "react-icons/fa";
+import api from "@/lib/axios";
 
 const Login: FC = () => {
   const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    router.push("/home");
+    const formData = new FormData(e.currentTarget);
+    const name = formData.get('name') as string;
+    const mobile = formData.get('mobile') as string;
+
+    setLoading(true);
+    setError("");
+    try {
+      const response = await api.post("/seba/user/login", { name, mobile });
+      if (response.data.status === "Success") {
+        localStorage.setItem("seba_token", response.data.data.token);
+        router.push("/home");
+      }
+    } catch (err: any) {
+      setError(err.response?.data?.message || "Login failed");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -44,6 +63,8 @@ const Login: FC = () => {
             One time registration -{" "}
             <span className="font-bold">SAFETY FIRST</span>
           </p>
+          
+          {error && <p className="text-red-500 text-xs text-center mt-2">{error}</p>}
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="mt-2 flex items-stretch">
@@ -81,10 +102,15 @@ const Login: FC = () => {
             {/* Submit */}
             <button
               type="submit"
-              className="w-[20%] bg-[#0b4b4b] rounded-xl border-2 border-[#083737] relative shadow-md flex items-center justify-center"
+              disabled={loading}
+              className="w-[20%] bg-[#0b4b4b] rounded-xl border-2 border-[#083737] relative shadow-md flex items-center justify-center disabled:opacity-50"
             >
               <div className="absolute inset-1 border border-white/30 rounded-lg" />
-              <FaPlay className="text-yellow-400 text-[32px] relative z-10" />
+              {loading ? (
+                 <div className="w-5 h-5 border-2 border-yellow-400 border-t-transparent rounded-full animate-spin relative z-10" />
+              ) : (
+                <FaPlay className="text-yellow-400 text-[32px] relative z-10" />
+              )}
             </button>
           </form>
 

@@ -1,7 +1,8 @@
 'use client'
 
-import { FC, ReactNode } from "react"
+import { FC, ReactNode, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
+import api from "@/lib/axios"
 import { AiOutlineHome } from "react-icons/ai"
 import { BsGlobe, BsShare } from "react-icons/bs"
 import { IoIosArrowBack } from "react-icons/io"
@@ -21,19 +22,7 @@ type BottomNavItemProps = {
   onClick?: () => void
 }
 
-// Data
-const ASSOCIATIONS: Association[] = [
-  { name: "ARCHITECT ASSOCIATION", img: "/images/member.webp" },
-  { name: "ELECTRICAL ASSOCIATION", img: "/images/member.webp" },
-  { name: "HARDWARE ASSOCIATION", img: "/images/member.webp" },
-  { name: "INTERIOR DESIGNER", img: "/images/member.webp" },
-  { name: "ELECTRICAL ASSOCIATION", img: "/images/member.webp" },
-  { name: "ELECTRICAL ASSOCIATION", img: "/images/member.webp" },
-  { name: "ELECTRICAL ASSOCIATION", img: "/images/member.webp" },
-  { name: "ELECTRICAL ASSOCIATION", img: "/images/member.webp" },
-  { name: "ELECTRICAL ASSOCIATION", img: "/images/member.webp" },
-  { name: "INTERIOR DESIGNER ASSOCIATION", img: "/images/member.webp" },
-]
+// Data (Removed static array)
 
 // Components
 const AssociationCard: FC<AssociationCardProps> = ({ name, img }) => (
@@ -65,6 +54,24 @@ const BottomNavItem: FC<BottomNavItemProps> = ({ children, label, onClick }) => 
 // Main Component
 const Associated: FC = () => {
   const router = useRouter()
+  const [associations, setAssociations] = useState<Association[]>([])
+
+  useEffect(() => {
+    const fetchAssociations = async () => {
+      try {
+        const { data } = await api.get('/seba/associated');
+        if (data.status === 'Success') {
+          setAssociations(data.data.map((item: any) => ({
+            name: item.name,
+            img: `http://localhost:5001/builder/${item.image}`
+          })))
+        }
+      } catch (err) {
+        console.error("Failed to fetch associations", err)
+      }
+    }
+    fetchAssociations()
+  }, [])
 
   return (
     <div className="h-screen bg-[#d9d9d9] flex justify-center">
@@ -98,7 +105,7 @@ const Associated: FC = () => {
 
         {/* Grid */}
         <div className="grid grid-cols-3 gap-4 mt-10">
-          {ASSOCIATIONS.map((item, index) => (
+          {associations.map((item, index) => (
             <AssociationCard
               key={index}
               name={item.name}

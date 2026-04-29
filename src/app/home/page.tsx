@@ -6,9 +6,12 @@ import { AiOutlineHome } from "react-icons/ai";
 import { FiSearch } from "react-icons/fi";
 import { LuLayoutDashboard } from "react-icons/lu"; // Dropbox icon mate substitute
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import api from "@/lib/axios";
 
 const Home = () => {
   const router = useRouter();
+  const [viewCount, setViewCount] = useState<string>("000000");
   const menu = [
     {
       label: "Associated",
@@ -31,6 +34,21 @@ const Home = () => {
       path: "/search",
     },
   ];
+
+  useEffect(() => {
+    const incrementViewCount = async () => {
+      try {
+        const { data } = await api.post("/seba/view");
+        if (data.status === "Success") {
+          setViewCount(String(data.data.viewCount).padStart(6, '0'));
+        }
+      } catch (err) {
+        console.error("Failed to increment view count", err);
+      }
+    };
+    incrementViewCount();
+  }, []);
+
   return (
     <>
       <div className="h-screen bg-[#d9d9d9] flex flex-col items-center">
@@ -53,7 +71,7 @@ const Home = () => {
               <div className="flex items-center gap-2 mt-2">
                 <FaEye className="text-[#3b5998] text-[20px]" />
                 <span className="tracking-[0.2em] text-[22px] font-mono font-bold text-gray-700">
-                  002345
+                  {viewCount}
                 </span>
               </div>
             </div>

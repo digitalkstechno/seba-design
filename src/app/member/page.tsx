@@ -1,7 +1,8 @@
 'use client'
 
-import { FC } from "react"
-import { useRouter } from "next/navigation"
+import { FC, useEffect, useState, Suspense } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
+import api from "@/lib/axios"
 import { AiOutlineHome } from "react-icons/ai"
 import { BsGlobe, BsShare } from "react-icons/bs"
 import { IoIosArrowBack } from "react-icons/io"
@@ -18,22 +19,45 @@ type MemberType = {
   address: string
   image: string
   dob: string
+  emailWebsite: string
 }
 
-// Dummy data (same structure, safe)
-const MEMBERS: MemberType[] = Array.from({ length: 4 }, (_, i) => ({
-  id: `SEBA000${i + 59}`,
-  name: "HIRENBHAI K. PATEL - Media Head",
-  category: "Builder & Developers",
-  company: "M K GROUP",
-  mobile: "98252 22223",
-  address: "B-86 Trikam Nagar Society, Near V-1 Bombay Market, L.H. Road, Surat - 395003",
-  image: "/images/member.webp",
-  dob: "25/01/1986"
-}))
-
-const Member: FC = () => {
+const MemberContent: FC = () => {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const urlCategory = searchParams.get('category') || ''
+  const urlArea = searchParams.get('area') || ''
+
+  const [members, setMembers] = useState<MemberType[]>([])
+  const [searchTerm, setSearchTerm] = useState("")
+
+  useEffect(() => {
+    const fetchMembers = async () => {
+      try {
+        let query = `/seba/member?search=${searchTerm}`
+        if (urlCategory) query += `&category=${encodeURIComponent(urlCategory)}`
+        if (urlArea) query += `&area=${encodeURIComponent(urlArea)}`
+
+        const { data } = await api.get(query)
+        if (data.status === 'Success') {
+          setMembers(data.data.map((item: any) => ({
+            id: item.memberId,
+            name: item.position ? `${item.name} - ${item.position}` : item.name,
+            category: item.category,
+            company: item.company,
+            mobile: item.mobile,
+            address: item.address,
+            image: item.image ? `http://localhost:5001/builder/${item.image}` : "/images/member.webp",
+            dob: "N/A", // DOB not requested in backend but kept in type
+            emailWebsite: item.emailWebsite
+          })))
+        }
+      } catch (err) {
+        console.error("Failed to fetch members", err)
+      }
+    }
+    fetchMembers()
+  }, [searchTerm])
 
   return (
     <div className="h-screen bg-[#d9d9d9] flex justify-center items-start">
@@ -72,6 +96,8 @@ const Member: FC = () => {
             type="text"
             placeholder="Search by Name / Surnames"
             className="flex-1 bg-transparent outline-none text-sm"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
           />
           <FaSearch className="text-gray-700" />
         </div>
@@ -79,7 +105,7 @@ const Member: FC = () => {
         {/* Scroll Area */}
         <div className="flex-1 overflow-y-auto pr-1">
 
-          {MEMBERS.map((member) => (
+          {members.map((member) => (
             <div key={member.id} className="mb-4 border border-gray-300 bg-white">
 
               <div className="flex p-2 gap-2">
@@ -92,7 +118,6 @@ const Member: FC = () => {
                     className="w-[60px] h-[70px] object-cover mx-auto"
                   />
                   <p className="mt-1 font-medium">{member.id}</p>
-                  <p>{member.dob}</p>
                 </div>
 
                 {/* Details */}
@@ -109,7 +134,7 @@ const Member: FC = () => {
               </div>
 
               <div className="bg-[#015d82] text-white text-center text-[12px] py-1">
-                www.website / email :
+                {member.emailWebsite || "www.website / email :"}
               </div>
 
             </div>
@@ -156,6 +181,14 @@ const Member: FC = () => {
 
       </div>
     </div>
+  )
+}
+
+const Member: FC = () => {
+  return (
+    <Suspense fallback={<div className="h-screen bg-[#d9d9d9] flex justify-center items-center">Loading...</div>}>
+      <MemberContent />
+    </Suspense>
   )
 }
 

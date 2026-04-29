@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FiSearch } from "react-icons/fi";
 import { BsGlobe, BsShare } from "react-icons/bs";
 import { IoCaretDownOutline } from "react-icons/io5";
@@ -9,17 +9,52 @@ import { LuLayoutDashboard } from "react-icons/lu";
 import { AiOutlineHome } from "react-icons/ai";
 import { useRouter } from "next/navigation";
 import { IoIosArrowBack } from "react-icons/io";
+import api from "@/lib/axios";
 
-const search = () => {
+const Search = () => {
     const router = useRouter();
-    const [isOn, setIsOn] = useState(true);
-    const [openDropdown, setOpenDropdown] = useState(null);
+    const [isOn, setIsOn] = useState(false);
+    const [openDropdown, setOpenDropdown] = useState<string | null>(null);
     const [category, setCategory] = useState("");
     const [area, setArea] = useState("");
-    const categories = ["Builder", "Electrician", "Architect"];
-    const areas = ["Surat", "Adajan", "Vesu"];
-    const toggleDropdown = (type) => {
+    const [categories, setCategories] = useState<string[]>([]);
+    const [areas, setAreas] = useState<string[]>([]);
+
+    useEffect(() => {
+        const fetchOptions = async () => {
+            try {
+                const { data } = await api.get('/seba/member');
+                if (data.status === 'Success') {
+                    const members = data.data;
+                    const cats = Array.from(new Set(members.map((m: any) => m.category).filter(Boolean))) as string[];
+                    const ars = Array.from(new Set(members.map((m: any) => m.area).filter(Boolean))) as string[];
+                    setCategories(cats);
+                    setAreas(ars);
+                }
+            } catch (err) {
+                console.error("Failed to fetch search options", err);
+            }
+        };
+        fetchOptions();
+    }, []);
+
+    const toggleDropdown = (type: string) => {
         setOpenDropdown(openDropdown === type ? null : type);
+    };
+
+    const handleToggle = () => {
+        const newIsOn = !isOn;
+        setIsOn(newIsOn);
+        if (newIsOn) {
+            let query = '';
+            if (category && area) query = `?category=${category}&area=${area}`;
+            else if (category) query = `?category=${category}`;
+            else if (area) query = `?area=${area}`;
+            
+            setTimeout(() => {
+                router.push(`/member${query}`);
+            }, 500);
+        }
     };
 
     return (
@@ -168,7 +203,7 @@ const search = () => {
                 {/* Radio button */}
                 <div className="flex justify-center mt-5">
                     <div
-                        onClick={() => setIsOn(!isOn)}
+                        onClick={handleToggle}
                         className="relative w-[180px] h-[58px] rounded-full p-[3px] cursor-pointer flex items-center transition-all duration-300"
                     >
                         <div
@@ -191,7 +226,7 @@ const search = () => {
                         <div
                             className="absolute h-[46px] w-[90px] rounded-full transition-all duration-500 flex items-center px-[5px]"
                             style={{
-                                transform: isOn ? "translateX(2px)" : "translateX(87px)",
+                                transform: isOn ? "translateX(87px)" : "translateX(2px)",
                                 backgroundColor: "#fcfcfc",
                                 background: "linear-gradient(to bottom, #ffffff, #e0e0e0)",
                                 boxShadow: "0 6px 15px rgba(0,0,0,0.3), inset 0 2px 2px white", // Pop-out effect
@@ -203,7 +238,7 @@ const search = () => {
                                 style={{
                                     background: "radial-gradient(circle at 30% 30%, #ffffff, #d4d4d4)",
                                     boxShadow: "0 2px 4px rgba(0,0,0,0.2), inset -1px -1px 3px rgba(0,0,0,0.1)",
-                                    transform: isOn ? "translateX(0px)" : "translateX(39px)"
+                                    transform: isOn ? "translateX(39px)" : "translateX(0px)"
                                 }}
                             />
                         </div>
@@ -212,7 +247,7 @@ const search = () => {
                             className={`absolute transition-all duration-500 font-bold text-xl select-none text-white`}
                             style={{
                                 zIndex: 5,
-                                right: isOn ? "25px" : "105px",
+                                left: isOn ? "25px" : "115px",
                                 opacity: 1,
                                 textShadow: "0 1px 2px rgba(0,0,0,0.3)"
                             }}
@@ -295,4 +330,4 @@ const search = () => {
     )
 }
 
-export default search;
+export default Search;
