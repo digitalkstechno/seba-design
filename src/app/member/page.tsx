@@ -47,7 +47,7 @@ const MemberContent: FC = () => {
             company: item.company,
             mobile: item.mobile,
             address: item.address,
-            image: item.image ? `http://localhost:5001/builder/${item.image}` : "/images/member.webp",
+            image: item.image ? `${process.env.NEXT_PUBLIC_IMAGE_URL}/builder/${item.image}` : "/images/member.webp",
             dob: "N/A", // DOB not requested in backend but kept in type
             emailWebsite: item.emailWebsite
           })))

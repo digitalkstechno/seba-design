@@ -63,7 +63,7 @@ const Associated: FC = () => {
         if (data.status === 'Success') {
           setAssociations(data.data.map((item: any) => ({
             name: item.name,
-            img: `http://localhost:5001/builder/${item.image}`
+            img: `${process.env.NEXT_PUBLIC_IMAGE_URL}/builder/${item.image}`
           })))
         }
       } catch (err) {
