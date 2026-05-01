@@ -114,9 +114,8 @@ const Associated: FC = () => {
           ))}
         </div>
 
-        {/* Bottom Navigation */}
         <div className="bg-[#003d3d] mt-auto -mx-5 px-6 py-3 flex justify-between items-center text-white">
-          <BottomNavItem label="home">
+          <BottomNavItem label="home" onClick={() => router.push('/home')}>
             <AiOutlineHome className="text-xl" />
           </BottomNavItem>
 

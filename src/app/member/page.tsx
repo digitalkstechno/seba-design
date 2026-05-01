@@ -32,6 +32,14 @@ const MemberContent: FC = () => {
   const [searchTerm, setSearchTerm] = useState("")
 
   useEffect(() => {
+    const token = localStorage.getItem("seba_token");
+    const registered = localStorage.getItem("seba_registered");
+    if (!token && !registered) {
+      router.push("/home?restricted=true");
+    }
+  }, [router]);
+
+  useEffect(() => {
     const fetchMembers = async () => {
       try {
         let query = `/seba/member?search=${searchTerm}`
@@ -57,7 +65,7 @@ const MemberContent: FC = () => {
       }
     }
     fetchMembers()
-  }, [searchTerm])
+  }, [searchTerm, urlCategory, urlArea])
 
   return (
     <div className="h-screen bg-[#d9d9d9] flex justify-center items-start">
@@ -68,7 +76,7 @@ const MemberContent: FC = () => {
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <IoIosArrowBack
-              onClick={() => router.back()}
+              onClick={() => router.push('/home')}
               className="text-xl cursor-pointer"
             />
             <p className="text-[14px] italic">
@@ -103,7 +111,7 @@ const MemberContent: FC = () => {
         </div>
 
         {/* Scroll Area */}
-        <div className="flex-1 overflow-y-auto pr-1">
+        <div className="flex-1 overflow-y-auto pr-1 no-scrollbar">
 
           {members.map((member) => (
             <div key={member.id} className="mb-4 border border-gray-300 bg-white">
@@ -142,10 +150,9 @@ const MemberContent: FC = () => {
 
         </div>
 
-        {/* Bottom Nav */}
         <div className="bg-[#003d3d] mt-auto -mx-5 px-6 py-3 flex justify-between items-center text-white">
 
-          <div className="flex flex-col items-center cursor-pointer opacity-90 hover:opacity-100">
+          <div onClick={() => router.push('/home')} className="flex flex-col items-center cursor-pointer opacity-90 hover:opacity-100">
             <AiOutlineHome className="text-xl" />
             <span className="text-[10px] mt-1">home</span>
           </div>

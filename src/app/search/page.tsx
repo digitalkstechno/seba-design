@@ -10,26 +10,39 @@ import { AiOutlineHome } from "react-icons/ai";
 import { useRouter } from "next/navigation";
 import { IoIosArrowBack } from "react-icons/io";
 import api from "@/lib/axios";
+import FooterSponsors from "@/components/FooterSponsors";
+import SearchableSelect from "@/components/SearchableSelect";
 
 const Search = () => {
     const router = useRouter();
     const [isOn, setIsOn] = useState(false);
     const [openDropdown, setOpenDropdown] = useState<string | null>(null);
-    const [category, setCategory] = useState("");
+    const [category, setCategory] = useState("All Categories");
     const [area, setArea] = useState("");
-    const [categories, setCategories] = useState<string[]>([]);
+    const [categories, setCategories] = useState<any[]>([]);
     const [areas, setAreas] = useState<string[]>([]);
+    const [sponsors, setSponsors] = useState<any[]>([]);
 
     useEffect(() => {
         const fetchOptions = async () => {
             try {
-                const { data } = await api.get('/seba/member');
-                if (data.status === 'Success') {
-                    const members = data.data;
-                    const cats = Array.from(new Set(members.map((m: any) => m.category).filter(Boolean))) as string[];
-                    const ars = Array.from(new Set(members.map((m: any) => m.area).filter(Boolean))) as string[];
-                    setCategories(cats);
+                // Fetch dynamic categories
+                const catRes = await api.get('/seba/category');
+                if (catRes.data.status === 'Success') {
+                    setCategories(catRes.data.data);
+                }
+
+                // Fetch members for areas (areas are still dynamic based on existing members)
+                const memberRes = await api.get('/seba/member');
+                if (memberRes.data.status === 'Success') {
+                    const ars = Array.from(new Set(memberRes.data.data.map((m: any) => m.area).filter(Boolean))) as string[];
                     setAreas(ars);
+                }
+
+                // Fetch sponsors
+                const sponsorRes = await api.get('/seba/sponsor');
+                if (sponsorRes.data.status === 'Success') {
+                    setSponsors(sponsorRes.data.data);
                 }
             } catch (err) {
                 console.error("Failed to fetch search options", err);
@@ -42,13 +55,15 @@ const Search = () => {
         setOpenDropdown(openDropdown === type ? null : type);
     };
 
-    const handleToggle = () => {
+    const handleToggle = async () => {
         const newIsOn = !isOn;
         setIsOn(newIsOn);
         if (newIsOn) {
             let query = '';
-            if (category && area) query = `?category=${category}&area=${area}`;
-            else if (category) query = `?category=${category}`;
+            const isAllCategories = category === "All Categories" || !category;
+            
+            if (!isAllCategories && area) query = `?category=${category}&area=${area}`;
+            else if (!isAllCategories) query = `?category=${category}`;
             else if (area) query = `?area=${area}`;
             
             setTimeout(() => {
@@ -56,6 +71,8 @@ const Search = () => {
             }, 500);
         }
     };
+
+    const coSponsor = sponsors.find(s => s.type === 'co-sponsor');
 
     return (
         <div className="h-screen bg-[#d9d9d9] flex justify-center items-start">
@@ -65,7 +82,7 @@ const Search = () => {
                     <div className="flex items-center gap-2">
                         <IoIosArrowBack onClick={() => router.back()} className="text-xl cursor-pointer" />
                         <p className="text-[14px] italic">
-                            Welcome to <span className="font-semibold">SEBA</span> Members List
+                            Welcome to <span className="font-semibold italic">Search Zone</span>
                         </p>
                     </div>
                     {/* Profile */}
@@ -82,123 +99,78 @@ const Search = () => {
                     </div>
                 </div>
 
-                {/* Title */}
-                <div className="flex justify-center mt-10">
-                    <h1 className="flex items-center text-[34px] tracking-[0.5px] font-[Poppins]">
+                <div className="flex justify-center mt-12 mb-6">
+                    <h1 className="flex items-center text-[42px] tracking-[0.5px] font-[Poppins]">
 
                         {/* Styled S */}
-                        <span className="text-red-600 font-extrabold text-[38px] leading-none mr-[2px] tracking-tight">
+                        <span className="text-red-600 font-extrabold text-[46px] leading-none mr-[2px] tracking-tight">
                             S
                         </span>
 
                         {/* earch */}
-                        <span className="text-gray-800 font-bold font-medium">earch</span>
+                        <span className="text-gray-800 font-bold">earch</span>
 
                         {/* Space */}
                         <span className="mx-[4px] text-gray-800 font-bold"></span>
 
                         {/* P */}
-                        <span className="text-gray-700 font-medium">P</span>
+                        <span className="text-gray-700 font-bold">P</span>
 
                         {/* Search Icon */}
-                        <FiSearch className="text-blue-500 text-[28px] mt-[6px] mx-[1px]" />
+                        <FiSearch className="text-blue-500 text-[32px] mt-[6px] mx-[1px]" />
 
                         {/* int */}
-                        <span className="text-gray-800 font-bold font-medium">int</span>
+                        <span className="text-gray-800 font-bold">int</span>
 
                     </h1>
                 </div>
 
                 {/* Dropdowns */}
-                <div className="mt-8 flex flex-col gap-4">
-
-                    {/* Category */}
-                    <div className="relative">
-                        <div
-                            onClick={() => toggleDropdown("category")}
-                            className="flex items-center justify-between px-4 py-1 rounded-full cursor-pointer"
-                            style={{
+                    <div className="flex flex-col gap-5 px-1">
+                        <SearchableSelect 
+                            options={[{name: "All Categories"}, ...categories]}
+                            value={category}
+                            onChange={(val) => setCategory(val)}
+                            placeholder="Category"
+                            showOthers={false}
+                            triggerStyle={{
                                 background: "#f7f7f7",
-                                boxShadow: "inset 0 2px 1px rgba(0,0,0,0.2), 0 2px 3px rgba(255,255,255,0.6)",
-                                border: "1px solid #cfcfcf"
+                                boxShadow: "inset 0 3px 2px rgba(0,0,0,0.1), 0 1px 2px white",
+                                border: "1px solid #cfcfcf",
+                                borderRadius: "9999px",
+                                height: "50px",
+                                paddingRight: "5px",
+                                paddingLeft: "1.25rem"
                             }}
-                        >
-                            <span className="text-gray-700 text-sm font-medium">
-                                {category || "Category"}
-                            </span>
+                            customIcon={
+                                <div className="w-10 h-10 bg-[#28b446] rounded-full flex items-center justify-center shadow-md">
+                                    <IoCaretDownOutline className="text-white text-xl" />
+                                </div>
+                            }
+                        />
 
-                            <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center shadow">
-                                <IoCaretDownOutline className={`text-white text-lg transition ${openDropdown === "category" ? "rotate-180" : ""}`} />
-                            </div>
-                        </div>
-
-                        {openDropdown === "category" && (
-                            <div className="absolute w-full mt-2 rounded-xl z-10"
-                                style={{
-                                    background: "#f7f7f7",
-                                    boxShadow: "0 6px 12px rgba(0,0,0,0.15)"
-                                }}
-                            >
-                                {categories.map((item, i) => (
-                                    <div
-                                        key={i}
-                                        onClick={() => {
-                                            setCategory(item);
-                                            setOpenDropdown(null);
-                                        }}
-                                        className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-200 cursor-pointer"
-                                    >
-                                        {item}
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Area */}
-                    <div className="relative">
-                        <div
-                            onClick={() => toggleDropdown("area")}
-                            className="flex items-center justify-between px-4 py-1 rounded-full cursor-pointer"
-                            style={{
+                        <SearchableSelect 
+                            options={areas.map(a => ({ name: a }))}
+                            value={area}
+                            onChange={(val) => setArea(val)}
+                            placeholder="Area"
+                            showOthers={false}
+                            triggerStyle={{
                                 background: "#f7f7f7",
-                                boxShadow: "inset 0 2px 1px rgba(0,0,0,0.2), 0 2px 3px rgba(255,255,255,0.6)",
-                                border: "1px solid #cfcfcf"
+                                boxShadow: "inset 0 3px 2px rgba(0,0,0,0.1), 0 1px 2px white",
+                                border: "1px solid #cfcfcf",
+                                borderRadius: "9999px",
+                                height: "50px",
+                                paddingRight: "5px",
+                                paddingLeft: "1.25rem"
                             }}
-                        >
-                            <span className="text-gray-700 text-sm font-medium">
-                                {area || "Area"}
-                            </span>
-
-                            <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center shadow">
-                                <IoCaretDownOutline className={`text-white text-lg transition ${openDropdown === "area" ? "rotate-180" : ""}`} />
-                            </div>
-                        </div>
-
-                        {openDropdown === "area" && (
-                            <div className="absolute w-full mt-2 rounded-xl z-10"
-                                style={{
-                                    background: "#f5f5f5",
-                                    boxShadow: "0 6px 12px rgba(0,0,0,0.15)"
-                                }}
-                            >
-                                {areas.map((item, i) => (
-                                    <div
-                                        key={i}
-                                        onClick={() => {
-                                            setArea(item);
-                                            setOpenDropdown(null);
-                                        }}
-                                        className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-200 cursor-pointer"
-                                    >
-                                        {item}
-                                    </div>
-                                ))}
-                            </div>
-                        )}
+                            customIcon={
+                                <div className="w-10 h-10 bg-[#28b446] rounded-full flex items-center justify-center shadow-md">
+                                    <IoCaretDownOutline className="text-white text-xl" />
+                                </div>
+                            }
+                        />
                     </div>
-
-                </div>
 
                 {/* Radio button */}
                 <div className="flex justify-center mt-5">
@@ -257,44 +229,11 @@ const Search = () => {
                     </div>
                 </div>
 
-                {/* Sponsored */}
-                <div className="mt-25 text-center text-md font-bold">
-                    :: Co-Sponsored by ::
-                </div>
-
-                {/* Banner  */}
-                <div className="mt-4 border-[1.5px] border-[#00aeef] rounded-2xl overflow-hidden bg-[#f3c14b]"
-                    style={{
-                        boxShadow: "0 4px 10px rgba(0,0,0,0.1)"
-                    }}
-                >
-                    <div className="flex items-center h-[150px]">
-                       
-                        <div className="flex-1 h-full flex items-center justify-center p-2">
-                            <img
-                                src="/images/anant-logo.png"
-                                className="max-w-full max-h-full object-contain"
-                                alt="Anant Group"
-                            />
-                        </div>
-
-                   
-                        <div className="h-[70%] w-[1px] bg-gray-600/30"></div>
-
-                    
-                        <div className="flex-1 h-full flex items-center justify-center p-2">
-                            <img
-                                src="/images/niketan-logo.png"
-                                className="max-w-full max-h-full object-contain"
-                                alt="Niketan Realty"
-                            />
-                        </div>
-                    </div>
-                </div>
+                <FooterSponsors type="co-sponsor" />
 
                 {/* Bottom Navigation Bar */}
-                <div className="bg-[#003d3d] mt-auto -mx-5 px-6 py-3 flex justify-between items-center text-white">
-                    <div className="flex flex-col items-center cursor-pointer opacity-90 hover:opacity-100">
+                <div className="bg-[#003d3d] -mx-5 px-6 py-3 flex justify-between items-center text-white">
+                    <div onClick={() => router.push('/home')} className="flex flex-col items-center cursor-pointer opacity-90 hover:opacity-100">
                         <AiOutlineHome className="text-xl" />
                         <span className="text-[10px] mt-1">home</span>
                     </div>
@@ -330,4 +269,4 @@ const Search = () => {
     )
 }
 
-export default Search;
+export default Search;

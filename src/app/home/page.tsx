@@ -8,10 +8,16 @@ import { LuLayoutDashboard } from "react-icons/lu"; // Dropbox icon mate substit
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import api from "@/lib/axios";
+import FooterSponsors from "@/components/FooterSponsors";
+import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 
-const Home = () => {
+const HomeContent = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [viewCount, setViewCount] = useState<string>("000000");
+  const [sponsors, setSponsors] = useState<any[]>([]);
+
   const menu = [
     {
       label: "Associated",
@@ -46,31 +52,91 @@ const Home = () => {
         console.error("Failed to increment view count", err);
       }
     };
+    
+    const fetchSponsors = async () => {
+      try {
+        const { data } = await api.get("/seba/sponsor");
+        if (data.status === "Success") {
+          setSponsors(data.data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch sponsors", err);
+      }
+    };
+
     incrementViewCount();
+    fetchSponsors();
   }, []);
+
+  useEffect(() => {
+    if (searchParams.get('restricted') === 'true') {
+      setShowRestriction(true);
+    }
+  }, [searchParams]);
+
+  const [showRestriction, setShowRestriction] = useState(false);
+
+  const handleMenuClick = (item: any) => {
+    if (item.label === "Members") {
+      const token = localStorage.getItem("seba_token");
+      const registered = localStorage.getItem("seba_registered");
+      if (!token && !registered) {
+        setShowRestriction(true);
+        return;
+      }
+    }
+    router.push(item.path);
+  };
+
+  const mainSponsor = sponsors.find(s => s.type === 'sponsor');
+  const coSponsor = sponsors.find(s => s.type === 'co-sponsor');
 
   return (
     <>
       <div className="h-screen bg-[#d9d9d9] flex flex-col items-center">
-        {/* <div className="w-full">
-           <img
-    src="/images/Coming-soon.jpg"
-    alt="coming soon"
-    className="absolute inset-0 w-full h-full object-cover"
-  />
-        </div> */}
         <div className="w-[420px] min-h-screen bg-[#f8f9fa] relative px-5 pt-6 shadow-2xl overflow-hidden border border-gray-200 flex flex-col">
+          
+          {/* Restriction Modal */}
+          {showRestriction && (
+            <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] z-[100] flex items-center justify-center p-6">
+              <div className="bg-white rounded-3xl p-8 shadow-2xl w-full max-w-[320px] animate-in zoom-in-95 duration-300 flex flex-col items-center text-center">
+                <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mb-4">
+                   <div className="w-8 h-8 rounded-full border-4 border-red-500 border-t-transparent animate-spin-slow" />
+                   <span className="absolute text-red-500 font-bold text-2xl">!</span>
+                </div>
+                <h3 className="text-xl font-extrabold text-gray-900 mb-2">Access Restricted</h3>
+                <p className="text-gray-500 text-sm leading-relaxed mb-6">
+                  To view our digital directory, you must first <span className="font-bold text-gray-800">Become a SEBA Member</span>.
+                </p>
+                
+                <div className="flex flex-col gap-3 w-full">
+                  <button 
+                    onClick={() => router.push("/newMember")}
+                    className="w-full bg-[#0b4b4b] text-white py-3.5 rounded-xl font-bold text-sm shadow-lg active:scale-95 transition-all"
+                  >
+                    Register Now
+                  </button>
+                  <button 
+                    onClick={() => setShowRestriction(false)}
+                    className="w-full bg-gray-100 text-gray-600 py-3.5 rounded-xl font-bold text-sm hover:bg-gray-200 active:scale-95 transition-all"
+                  >
+                    Maybe Later
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Top Section */}
-          <div className="flex justify-between items-start">
+          <div className="flex justify-between items-start mb-2">
             <div>
-              <p className="text-[15px] italic text-gray-700">
-                Welcome to <span className="font-bold text-black">SEBA</span>{" "}
-                digital directory
+              <p className="text-[14px] italic text-gray-800">
+                Welcome to <span className="font-bold">SEBA</span> digital directory
               </p>
               {/* View Counter */}
-              <div className="flex items-center gap-2 mt-2">
+              <div className="flex items-center gap-2 mt-1">
                 <FaEye className="text-[#3b5998] text-[20px]" />
-                <span className="tracking-[0.2em] text-[22px] font-mono font-bold text-gray-700">
+                <span className="text-[28px] font-mono font-medium text-gray-900 tracking-[1px]">
                   {viewCount}
                 </span>
               </div>
@@ -97,55 +163,49 @@ const Home = () => {
 
           {/* Floating Social Media Tabs - EXACT MATCH */}
           <div className="absolute right-[-18px] top-[180px] flex flex-col items-end gap-[30px]">
-            {/* Facebook */}
-            <div className="relative z-30 flex items-center bg-[#3bb2e6] text-white pl-2 pr-6 py-1.5 rounded-l-full shadow-lg transform -rotate-[14deg] origin-right">
-              <div className="bg-white rounded-full w-[26px] h-[26px] flex items-center justify-center">
-                <FaFacebookF className="text-[#3bb2e6] text-[13px]" />
+            {/* facebook */}
+            <div className="relative z-30 flex items-center bg-[#33a1f2] text-white pl-2 pr-6 py-1 rounded-l-full shadow-lg transform -rotate-[14deg] origin-right">
+              <div className="bg-[#3b5998] rounded-full w-[24px] h-[24px] flex items-center justify-center border border-white/20">
+                <FaFacebookF className="text-white text-[11px]" />
               </div>
-              <span className="text-[13px] font-semibold italic ml-2">
-                facebook
-              </span>
+              <span className="text-[12px] font-bold italic ml-2">facebook</span>
             </div>
-            {/* Instagram */}
-            <div className="relative z-20 -mt-5 flex items-center bg-gradient-to-r from-yellow-400 via-pink-500 to-red-500 text-white pl-2 pr-6 py-1.5 rounded-l-full shadow-lg transform -rotate-[14deg] origin-right">
-              <div className="bg-white rounded-full w-[26px] h-[26px] flex items-center justify-center">
-                <FaInstagram className="text-pink-500 text-[13px]" />
+            {/* instagram */}
+            <div className="relative z-20 -mt-5 flex items-center bg-gradient-to-r from-[#f09433] via-[#e6683c] to-[#bc1888] text-white pl-2 pr-6 py-1 rounded-l-full shadow-lg transform -rotate-[14deg] origin-right">
+              <div className="bg-white rounded-full w-[24px] h-[24px] flex items-center justify-center">
+                <FaInstagram className="text-[#e1306c] text-[12px]" />
               </div>
-              <span className="text-[13px] font-semibold italic ml-2">
-                instagram
-              </span>
+              <span className="text-[12px] font-bold italic ml-2">instagram</span>
             </div>
-            {/* Events */}
-            <div className="relative z-10 -mt-5 flex items-center bg-green-600 text-white pl-2 pr-6 py-1.5 rounded-l-full shadow-lg transform -rotate-[14deg] origin-right">
-              <div className="bg-black rounded-full w-[26px] h-[26px] flex items-center justify-center">
-                <div className="w-[14px] h-[14px] bg-yellow-400 rounded-full"></div>
+            {/* events */}
+            <div className="relative z-10 -mt-5 flex items-center bg-[#00a859] text-white pl-2 pr-6 py-1 rounded-l-full shadow-lg transform -rotate-[14deg] origin-right">
+              <div className="bg-black rounded-full w-[24px] h-[24px] flex items-center justify-center">
+                <div className="w-[12px] h-[12px] bg-yellow-400 rounded-full"></div>
               </div>
-              <span className="text-[13px] font-semibold italic ml-2 text-cyan-300">
-                events
-              </span>
+              <span className="text-[12px] font-bold italic ml-2 text-[#ccff00]">events</span>
             </div>
           </div>
 
-          <div className="grid grid-cols-4 gap-4 mt-8 justify-items-center">
+          <div className="grid grid-cols-4 gap-4 mt-6 justify-items-center">
             {menu.map((item, idx) => (
               <div
                 key={idx}
-                onClick={() => router.push(item.path)}
-                className="flex flex-col items-center cursor-pointer"
+                onClick={() => handleMenuClick(item)}
+                className="flex flex-col items-center cursor-pointer group"
               >
-                <div className="bg-gray-200/70 rounded-lg w-[50px] h-[50px] flex justify-center items-center shadow-sm border border-gray-100 hover:bg-gray-300 transition">
-                  {item.img ? (
-                    <img
-                      src={item.img}
-                      alt={item.label}
-                      className="h-6 w-6 object-contain"
-                    />
-                  ) : (
-                    item.icon
-                  )}
+                <div className="bg-gray-200/60 rounded-xl w-[70px] h-[65px] flex justify-center items-center shadow-md border border-gray-100 group-hover:bg-gray-300 transition-all active:scale-95">
+                   {item.img ? (
+                     <img
+                       src={item.img}
+                       alt={item.label}
+                       className="h-7 w-7 object-contain"
+                     />
+                   ) : (
+                     item.icon
+                   )}
                 </div>
 
-                <p className="text-[11px] mt-2 italic text-gray-600">
+                <p className="text-[12px] mt-2 italic font-bold text-gray-700">
                   {item.label}
                 </p>
               </div>
@@ -153,26 +213,14 @@ const Home = () => {
           </div>
 
           {/* Tagline */}
-          <p className="text-center italic mt-8 text-[16px] font-medium text-gray-700">
+          <p className="text-center italic mt-6 text-[18px] font-extrabold text-[#003d3d]">
             Your Digital Partner to Grow
           </p>
 
-          {/* Sponsor Section */}
-          <div className="text-center mt-6 px-4">
-            <p className="text-[14px] text-gray-600 font-medium">
-              :: Sponsor ::
-            </p>
-            <div className="bg-[#003d3d] rounded-2xl py-6 mt-2 shadow-inner flex justify-center">
-              <img
-                src="/images/ananta-height.png"
-                alt="ANANTA"
-                className="h-[90px] object-contain"
-              />
-            </div>
-          </div>
+          <FooterSponsors type="sponsor" />
 
           {/* Bottom Navigation Bar */}
-          <div className="bg-[#003d3d] mt-auto -mx-5 px-6 py-3 flex justify-between items-center text-white">
+          <div className="bg-[#003d3d] -mx-5 px-6 py-3 flex justify-between items-center text-white">
             <div className="flex flex-col items-center cursor-pointer opacity-90 hover:opacity-100">
               <AiOutlineHome className="text-xl" />
               <span className="text-[10px] mt-1">home</span>
@@ -208,6 +256,14 @@ const Home = () => {
         </div>
       </div>
     </>
+  );
+};
+
+const Home = () => {
+  return (
+    <Suspense fallback={<div className="h-screen bg-[#d9d9d9] flex justify-center items-center">Loading...</div>}>
+      <HomeContent />
+    </Suspense>
   );
 };
 

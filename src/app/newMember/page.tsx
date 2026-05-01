@@ -1,6 +1,6 @@
 'use client'
 
-import { FC, useState, FormEvent } from "react"
+import { FC, useState, FormEvent, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import api from "@/lib/axios"
 import { BsGlobe, BsShare } from "react-icons/bs"
@@ -9,6 +9,9 @@ import { FaFilePdf } from "react-icons/fa"
 import { AiOutlineHome } from "react-icons/ai"
 import { LuLayoutDashboard } from "react-icons/lu"
 import { IoIosArrowBack } from "react-icons/io"
+import { jsPDF } from "jspdf"
+import SearchableSelect from "@/components/SearchableSelect"
+import FooterSponsors from "@/components/FooterSponsors"
 
 import Cropper, { Area } from 'react-easy-crop'
 
@@ -49,8 +52,10 @@ const getCroppedImg = (
 
 const NewMember: FC = () => {
   const router = useRouter()
+  const formRef = useRef<HTMLFormElement>(null)
   const [loading, setLoading] = useState(false)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
+  const [pdfFile, setPdfFile] = useState<File | null>(null)
   const [pdfName, setPdfName] = useState<string | null>(null)
 
   // Cropper states
@@ -60,6 +65,25 @@ const NewMember: FC = () => {
   const [zoom, setZoom] = useState(1)
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null)
   const [croppedFile, setCroppedFile] = useState<File | null>(null)
+
+  // Categories
+  const [categories, setCategories] = useState<any[]>([])
+  const [categorySelection, setCategorySelection] = useState("")
+  const [showOtherCategory, setShowOtherCategory] = useState(false)
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const { data } = await api.get("/seba/category")
+        if (data.status === "Success") {
+          setCategories(data.data)
+        }
+      } catch (err) {
+        console.error("Failed to fetch categories", err)
+      }
+    }
+    fetchCategories()
+  }, [])
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -94,6 +118,107 @@ const NewMember: FC = () => {
     }
   }
 
+  const handleDownloadPDF = async () => {
+    if (!formRef.current) return
+    const formData = new FormData(formRef.current)
+    
+    const doc = new jsPDF()
+    const pageWidth = doc.internal.pageSize.getWidth()
+    const pageHeight = doc.internal.pageSize.getHeight()
+
+    // 1. Decorative Background Elements
+    doc.setFillColor(11, 75, 75) // Theme Color #0b4b4b
+    doc.rect(0, 0, 15, pageHeight, 'F') // Vertical Sidebar
+    
+    // 2. Header Section
+    doc.setFont("helvetica", "bold")
+    doc.setFontSize(28)
+    doc.setTextColor(11, 75, 75)
+    doc.text("SEBA", 25, 25)
+    
+    doc.setFontSize(10)
+    doc.setTextColor(100, 100, 100)
+    doc.setFont("helvetica", "italic")
+    doc.text("Surat East Builder Association", 25, 32)
+    
+    doc.setDrawColor(11, 75, 75)
+    doc.setLineWidth(0.5)
+    doc.line(25, 38, 190, 38)
+
+    // 3. Document Title
+    doc.setFont("helvetica", "bold")
+    doc.setFontSize(16)
+    doc.setTextColor(50, 50, 50)
+    doc.text("MEMBERSHIP APPLICATION FORM", 25, 52)
+
+    // 4. Member Photo
+    if (imagePreview) {
+      try {
+        // Shadow effect for photo
+        doc.setFillColor(240, 240, 240)
+        doc.rect(152, 47, 40, 50, 'F')
+        
+        doc.addImage(imagePreview, 'JPEG', 150, 45, 40, 50)
+        doc.setDrawColor(11, 75, 75)
+        doc.setLineWidth(0.8)
+        doc.rect(150, 45, 40, 50)
+      } catch (e) {
+        console.error("PDF Image add failed", e)
+      }
+    }
+
+    // 5. Member Details Section
+    const fields = [
+      { label: "FULL NAME", value: formData.get('name'), icon: "👤" },
+      { label: "DESIGNATION", value: formData.get('position'), icon: "💼" },
+      { label: "BUSINESS CATEGORY", value: showOtherCategory ? formData.get('otherCategory') : categorySelection, icon: "🏢" },
+      { label: "PRIMARY MOBILE", value: formData.get('mobile'), icon: "📱" },
+      { label: "OFFICE NUMBER", value: formData.get('officeNo'), icon: "📞" },
+      { label: "OPERATIONAL AREA", value: formData.get('area'), icon: "📍" },
+      { label: "OFFICE ADDRESS", value: formData.get('address'), icon: "🏠" },
+      { label: "EMAIL / WEBSITE", value: formData.get('emailWebsite'), icon: "🌐" },
+    ]
+
+    let y = 70
+    fields.forEach((field, index) => {
+      // Background for alternate rows
+      if (index % 2 === 0) {
+        doc.setFillColor(245, 248, 248)
+        doc.rect(25, y - 6, 115, 12, 'F')
+      }
+
+      doc.setFont("helvetica", "bold")
+      doc.setFontSize(9)
+      doc.setTextColor(11, 75, 75)
+      doc.text(field.label, 30, y)
+      
+      doc.setFont("helvetica", "normal")
+      doc.setFontSize(11)
+      doc.setTextColor(0, 0, 0)
+      
+      const val = field.value?.toString() || "N/A"
+      const splitText = doc.splitTextToSize(val, 80)
+      doc.text(splitText, 30, y + 6)
+      
+      y += (splitText.length * 6) + 12
+    })
+
+    // 6. Footer Section
+    doc.setFillColor(11, 75, 75)
+    doc.rect(0, pageHeight - 20, pageWidth, 20, 'F')
+    
+    doc.setFont("helvetica", "bold")
+    doc.setFontSize(10)
+    doc.setTextColor(255, 255, 255)
+    doc.text("CONFIDENTIAL DOCUMENT", pageWidth / 2, pageHeight - 12, { align: 'center' })
+    
+    doc.setFontSize(8)
+    doc.setFont("helvetica", "normal")
+    doc.text("This form is generated electronically via SEBA Digital Portal", pageWidth / 2, pageHeight - 7, { align: 'center' })
+
+    doc.save(`${formData.get('name') || 'Member'}_SEBA_Application.pdf`)
+  }
+
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setLoading(true)
@@ -104,10 +229,25 @@ const NewMember: FC = () => {
         formData.set('image', croppedFile)
       }
 
+      // Handle category
+      if (showOtherCategory) {
+        const otherCat = formData.get('otherCategory') as string
+        if (otherCat) {
+          // Add to database first
+          try {
+            await api.post('/seba/category', { name: otherCat })
+          } catch (e) {}
+          formData.set('category', otherCat)
+        }
+      } else {
+        formData.set('category', categorySelection)
+      }
+
       const { data } = await api.post('/seba/member/new', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       })
       if (data.status === 'Success') {
+        localStorage.setItem("seba_registered", "true")
         alert("Member application submitted successfully!")
         router.push("/home")
       }
@@ -160,7 +300,7 @@ const NewMember: FC = () => {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex-1 flex flex-col">
+        <form ref={formRef} onSubmit={handleSubmit} className="flex-1 flex flex-col overflow-y-auto no-scrollbar pb-6">
           {/* Upload Box */}
           <div className="absolute right-4 top-[90px] w-[120px] h-[130px] border-2 border-blue-400 rounded-lg bg-white shadow-sm flex flex-col items-center justify-center text-center text-[12px] overflow-hidden">
             {imagePreview ? (
@@ -188,7 +328,35 @@ const NewMember: FC = () => {
           <div className="mt-3 flex flex-col gap-2 text-[13px]">
             <input name="name" required className="h-9 px-3 rounded bg-white outline-none" placeholder="Full Name :" />
             <input name="position" className="h-9 px-3 rounded bg-white outline-none" placeholder="Position :" />
-            <input name="category" required className="h-9 px-3 rounded bg-white outline-none" placeholder="Category in :" />
+            
+            <div className="flex flex-col gap-1">
+              <SearchableSelect 
+                options={categories}
+                value={categorySelection}
+                onChange={(val) => {
+                  setCategorySelection(val)
+                  setShowOtherCategory(val === 'Others')
+                }}
+                placeholder="Select Category :"
+                triggerStyle={{
+                  borderRadius: '0.25rem', // Match 'rounded' class
+                  height: '2.25rem', // Match 'h-9'
+                  backgroundColor: 'white',
+                  border: 'none',
+                  paddingLeft: '0.75rem',
+                  paddingRight: '0.75rem'
+                }}
+              />
+              {showOtherCategory && (
+                <input 
+                  name="otherCategory" 
+                  required 
+                  className="h-9 px-3 rounded bg-white outline-none border border-indigo-200" 
+                  placeholder="Enter Category Name :" 
+                />
+              )}
+            </div>
+
             <input name="mobile" required className="h-9 px-3 rounded bg-white outline-none" placeholder="Contact No. :" />
             <input name="officeNo" className="h-9 px-3 rounded bg-white outline-none" placeholder="Office No." />
             <input name="area" required className="h-9 px-3 rounded bg-white outline-none" placeholder="Area :" />
@@ -205,23 +373,16 @@ const NewMember: FC = () => {
           {/* PDF + Call Section */}
           <div className="flex items-center gap-3 mt-3 px-8">
 
-            {/* PDF Upload */}
-            <label className="relative flex flex-col items-center justify-center bg-white border-2 border-red-400 rounded-md w-[65px] h-[80px] cursor-pointer">
-              <input
-                type="file"
-                name="pdf"
-                accept="application/pdf"
-                className="absolute inset-0 opacity-0 cursor-pointer"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) setPdfName(file.name);
-                }}
-              />
-              <FaFilePdf className={pdfName ? "text-green-600 text-xl" : "text-red-600 text-xl"} />
+            {/* PDF Download Button */}
+            <div 
+              onClick={handleDownloadPDF}
+              className="relative flex flex-col items-center justify-center bg-white border-2 border-red-400 rounded-md w-[65px] h-[80px] cursor-pointer"
+            >
+              <FaFilePdf className="text-red-600 text-xl" />
               <span className="text-[10px] font-semibold mt-1 text-center truncate w-full px-1">
-                {pdfName ? "Uploaded" : "PDF"}
+                PDF
               </span>
-            </label>
+            </div>
 
             {/* Text */}
             <p className="text-[11px] text-gray-800 italic leading-tight flex-1">
@@ -230,12 +391,15 @@ const NewMember: FC = () => {
             </p>
 
             {/* Call Button */}
-            <div className="flex items-star bg-[#e5e5e5] rounded-lg px-1 py-1 shadow-sm border border-gray-300 border-t-2 border-t-black h-[48px]">
+            <a 
+              href="tel:1111111111"
+              className="flex items-star bg-[#e5e5e5] rounded-lg px-1 py-1 shadow-sm border border-gray-300 border-t-2 border-t-black h-[48px] no-underline"
+            >
               <HiOutlinePhone className="text-3xl text-green-600 mt-1" />
-              <span className="text-[11px] mt-[8px] font-medium text-gray-700 leading-none">
+              <span className="text-[11px] mt-[8px] font-medium text-gray-700 leading-none ml-1">
                 Call
               </span>
-            </div>
+            </a>
           </div>
 
           {/* Submit */}
@@ -244,10 +408,9 @@ const NewMember: FC = () => {
           </button>
         </form>
 
-        {/* Bottom Nav */}
-        <div className="bg-[#003d3d] mt-auto -mx-5 px-6 py-3 flex justify-between items-center text-white">
+          <div className="bg-[#003d3d] mt-auto -mx-5 px-6 py-3 flex justify-between items-center text-white">
 
-          <div className="flex flex-col items-center cursor-pointer opacity-90 hover:opacity-100">
+          <div onClick={() => router.push('/home')} className="flex flex-col items-center cursor-pointer opacity-90 hover:opacity-100">
             <AiOutlineHome className="text-xl" />
             <span className="text-[10px] mt-1">home</span>
           </div>
@@ -343,4 +506,4 @@ const NewMember: FC = () => {
   )
 }
 
-export default NewMember
+export default NewMember

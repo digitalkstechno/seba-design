@@ -18,16 +18,23 @@ const Login: FC = () => {
 
     setLoading(true);
     setError("");
+    
+    // Always store details to skip splash next time if needed
+    localStorage.setItem("seba_user_name", name);
+    localStorage.setItem("seba_user_mobile", mobile);
+
     try {
       const response = await api.post("/seba/user/login", { name, mobile });
       if (response.data.status === "Success") {
         localStorage.setItem("seba_token", response.data.data.token);
-        router.push("/home");
       }
     } catch (err: any) {
-      setError(err.response?.data?.message || "Login failed");
+      console.log("Not a member, proceeding as guest");
+      // Clear token if it exists from a previous login
+      localStorage.removeItem("seba_token");
     } finally {
       setLoading(false);
+      router.push("/home");
     }
   };
 
