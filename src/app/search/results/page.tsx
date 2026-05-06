@@ -1,0 +1,187 @@
+'use client'
+
+import { FC, useEffect, useState, Suspense } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
+import api from "@/lib/axios"
+import { AiOutlineHome } from "react-icons/ai"
+import { BsGlobe, BsShare } from "react-icons/bs"
+import { IoIosArrowBack } from "react-icons/io"
+import { LuLayoutDashboard } from "react-icons/lu"
+import { RiWifiFill } from "react-icons/ri"
+
+// Types
+type Member = {
+  id: string
+  name: string
+  company: string
+  address: string
+  image: string
+  hasNfcCard: boolean
+  cardId: string | null
+}
+
+const ResultsContent: FC = () => {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const urlCategory = searchParams.get('category') || ''
+  const urlArea = searchParams.get('area') || ''
+
+  const [members, setMembers] = useState<Member[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchMembers = async () => {
+      try {
+        let query = `/seba/member?`
+        if (urlCategory) query += `category=${encodeURIComponent(urlCategory)}&`
+        if (urlArea) query += `area=${encodeURIComponent(urlArea)}`
+
+        const { data } = await api.get(query)
+        if (data.status === 'Success') {
+          setMembers(data.data.map((item: any) => ({
+            id: item.memberId,
+            name: item.name,
+            company: item.company,
+            address: item.address,
+            image: item.image ? `${process.env.NEXT_PUBLIC_IMAGE_URL}/builder/${item.image}` : "/images/member.webp",
+            hasNfcCard: item.hasNfcCard,
+            cardId: item.cardId
+          })).sort((a: any, b: any) => {
+            if (a.hasNfcCard === b.hasNfcCard) {
+              return a.name.localeCompare(b.name);
+            }
+            return a.hasNfcCard ? -1 : 1;
+          }))
+        }
+      } catch (err) {
+        console.error("Failed to fetch members", err)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchMembers()
+  }, [urlCategory, urlArea])
+
+  return (
+    <div className="h-screen bg-[#d9d9d9] flex justify-center">
+      <div className="w-[420px] h-full bg-[#eeeeee] px-5 pt-5 shadow-md flex flex-col relative overflow-hidden">
+
+        {/* Header */}
+        <div className="flex items-center gap-2 mb-4">
+          <div 
+            onClick={() => router.back()}
+            className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm cursor-pointer"
+          >
+            <IoIosArrowBack className="text-xl text-gray-700" />
+          </div>
+          <p className="text-[16px] font-black text-[#0b4b4b] uppercase tracking-tight ml-2">
+            {(urlCategory && urlCategory !== 'All Categories') ? urlCategory.toUpperCase() : "SEBA MEMBERS"}
+          </p>
+        </div>
+
+
+        {/* List */}
+        <div className="flex-1 overflow-y-auto px-1 py-2 space-y-3 no-scrollbar pb-32">
+          {loading ? (
+             <div className="flex justify-center py-10"><p className="text-gray-400 italic">Searching members...</p></div>
+          ) : members.length === 0 ? (
+             <div className="flex justify-center py-10"><p className="text-gray-400 italic">No members found in this area.</p></div>
+          ) : members.map((member) => (
+            <div key={member.id} className="flex items-center">
+              {/* Card */}
+              <div className="bg-white rounded-xl flex items-center shadow-sm border border-gray-100 h-[70px] flex-1 overflow-hidden relative">
+                {/* Profile */}
+                <div className="pl-2 shrink-0">
+                  <div className="w-[60px] h-[60px] rounded-full border-[1.5px] border-[#00a9e0] overflow-hidden">
+                    <img
+                      src={member.image}
+                      alt={member.name}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                </div>
+
+                {/* Content */}
+                <div className="flex-1 ml-3 pr-2 min-w-0">
+                  <div className="border-b border-[#00a9e0]">
+                    <p className="font-bold text-[11px] truncate uppercase">
+                      {member.name}
+                    </p>
+                  </div>
+                  <div className="border-b border-[#00a9e0] py-[1px]">
+                    <p className="text-[10px] font-semibold truncate uppercase text-gray-700">
+                      {member.company}
+                    </p>
+                  </div>
+                  <p className="text-[9px] font-semibold truncate text-gray-400 mt-0.5 italic">
+                    {member.address}
+                  </p>
+                </div>
+              </div>
+
+              {/* NFC Arrow */}
+              {member.hasNfcCard && (
+                <div 
+                  onClick={() => router.push(`/memberDetail?id=${member.id}`)}
+                  className="ml-[2px] flex items-center cursor-pointer active:scale-95 transition-transform"
+                >
+                  <div
+                    className="relative w-[28px] h-[35px] flex items-center justify-center"
+                    style={{
+                      clipPath: 'polygon(0% 0%, 100% 50%, 0% 100%)',
+                      background: 'linear-gradient(to bottom, #e31e24 50%, #a11c1f 50%)'
+                    }}
+                  >
+                    <div className="absolute left-[2px] top-1/2 -translate-y-1/2 w-[7px] h-[7px] bg-white border border-[#a11c1f] rounded-full" />
+                    <RiWifiFill
+                      className="text-white text-[14px] ml-[4px]"
+                      style={{ transform: "rotate(90deg)" }}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
+
+        </div>
+
+        {/* Bottom Nav */}
+        <div className="bg-[#003d3d] mt-auto -mx-5 px-6 py-3 flex justify-between items-center text-white z-20">
+          <div onClick={() => router.push('/home')} className="flex flex-col items-center cursor-pointer opacity-90 hover:opacity-100">
+            <AiOutlineHome className="text-xl" />
+            <span className="text-[10px] mt-1 font-bold">home</span>
+          </div>
+          <div className="flex flex-col items-center cursor-pointer opacity-90 hover:opacity-100">
+            <img src="/images/seba-link1.png" alt="app" className="w-8 h-8 object-contain" />
+            <span className="text-[10px] -mt-1 font-bold">app link</span>
+          </div>
+          <div className="flex flex-col items-center cursor-pointer opacity-90 hover:opacity-100">
+            <BsGlobe className="text-xl" />
+            <span className="text-[10px] mt-1 font-bold">www.seba</span>
+          </div>
+          <div className="flex flex-col items-center cursor-pointer opacity-90 hover:opacity-100">
+            <LuLayoutDashboard className="text-xl" />
+            <span className="text-[10px] mt-1 font-bold">dropbox</span>
+          </div>
+          <button className="flex flex-col items-center cursor-pointer opacity-90 hover:opacity-100">
+            <BsShare className="text-lg" />
+            <span className="text-[10px] mt-1 font-bold">share</span>
+          </button>
+        </div>
+
+      </div>
+      
+      <style jsx>{`
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+      `}</style>
+    </div>
+  )
+}
+
+const ResultsPage: FC = () => (
+  <Suspense fallback={<div>Loading...</div>}>
+    <ResultsContent />
+  </Suspense>
+)
+
+export default ResultsPage

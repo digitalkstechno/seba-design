@@ -11,8 +11,6 @@ import { LuLayoutDashboard } from "react-icons/lu"
 import { IoIosArrowBack } from "react-icons/io"
 import { jsPDF } from "jspdf"
 import SearchableSelect from "@/components/SearchableSelect"
-import FooterSponsors from "@/components/FooterSponsors"
-
 import Cropper, { Area } from 'react-easy-crop'
 
 const getCroppedImg = (
@@ -55,8 +53,7 @@ const NewMember: FC = () => {
   const formRef = useRef<HTMLFormElement>(null)
   const [loading, setLoading] = useState(false)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
-  const [pdfFile, setPdfFile] = useState<File | null>(null)
-  const [pdfName, setPdfName] = useState<string | null>(null)
+  const [croppedFile, setCroppedFile] = useState<File | null>(null)
 
   // Cropper states
   const [originalImage, setOriginalImage] = useState<string | null>(null)
@@ -64,12 +61,15 @@ const NewMember: FC = () => {
   const [crop, setCrop] = useState({ x: 0, y: 0 })
   const [zoom, setZoom] = useState(1)
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null)
-  const [croppedFile, setCroppedFile] = useState<File | null>(null)
 
   // Categories
   const [categories, setCategories] = useState<any[]>([])
   const [categorySelection, setCategorySelection] = useState("")
   const [showOtherCategory, setShowOtherCategory] = useState(false)
+  const [areaValue, setAreaValue] = useState("")
+  const [pincode, setPincode] = useState("")
+  const [city, setCity] = useState("Surat")
+  const [state, setState] = useState("Gujarat")
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -243,6 +243,12 @@ const NewMember: FC = () => {
         formData.set('category', categorySelection)
       }
 
+      // Ensure area is set from our state
+      formData.set('area', areaValue)
+      formData.set('pincode', pincode)
+      formData.set('city', city)
+      formData.set('state', state)
+
       const { data } = await api.post('/seba/member/new', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       })
@@ -273,19 +279,6 @@ const NewMember: FC = () => {
             <p className="text-[14px] italic">
               Welcome to <span className="font-semibold">SEBA</span> Members List
             </p>
-          </div>
-
-          {/* Profile */}
-          <div className="absolute right-4 top-4">
-            <div className="p-[3px] rounded-full bg-yellow-300 shadow-[0_0_15px_#facc15]">
-              <div className="w-14 h-14 rounded-full overflow-hidden bg-white">
-                <img
-                  src="/images/user-profile.jpg"
-                  alt="profile"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            </div>
           </div>
         </div>
 
@@ -358,17 +351,86 @@ const NewMember: FC = () => {
             </div>
 
             <input name="mobile" required className="h-9 px-3 rounded bg-white outline-none" placeholder="Contact No. :" />
-            <input name="officeNo" className="h-9 px-3 rounded bg-white outline-none" placeholder="Office No." />
-            <input name="area" required className="h-9 px-3 rounded bg-white outline-none" placeholder="Area :" />
+            
+            <input name="officeNo" className="h-9 px-3 rounded bg-white outline-none" placeholder="Office / Shop No. :" />
+
+            <input 
+              name="pincode" 
+              maxLength={6}
+              value={pincode}
+              onChange={(e) => {
+                const val = e.target.value.replace(/\D/g, '');
+                setPincode(val);
+                if (val.length === 6) {
+                  fetch(`https://api.postalpincode.in/pincode/${val}`)
+                    .then(res => res.json())
+                    .then(data => {
+                      if (data[0].Status === "Success") {
+                        const post = data[0].PostOffice[0];
+                        setCity(post.District);
+                        setState(post.State);
+                        setAreaValue(post.Name); // Neighborhood/Area
+                      }
+                    });
+                }
+              }}
+              className="h-9 px-3 rounded bg-white outline-none border border-blue-100" 
+              placeholder="Pincode : (Auto-fills Area/City/State)" 
+            />
+
+            <input 
+              name="area" 
+              required 
+              value={areaValue}
+              onChange={(e) => setAreaValue(e.target.value)}
+              className="h-9 px-3 rounded bg-white outline-none" 
+              placeholder="Area / Locality :" 
+            />
 
             <textarea
               name="address"
+              required
               className="h-16 px-3 py-2 rounded bg-white outline-none resize-none"
-              placeholder="Office Address :"
+              placeholder="Full Office Address :"
             />
+
+            <div className="grid grid-cols-2 gap-2">
+              {/* City Dropdown */}
+              <select 
+                name="city"
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+                className="h-9 px-3 rounded bg-white outline-none appearance-none"
+              >
+                <option value="">Select City</option>
+                <option value="Surat">Surat</option>
+                <option value="Ahmedabad">Ahmedabad</option>
+                <option value="Vadodara">Vadodara</option>
+                <option value="Rajkot">Rajkot</option>
+                <option value="Mumbai">Mumbai</option>
+                <option value="Pune">Pune</option>
+                <option value="Delhi">Delhi</option>
+              </select>
+
+              {/* State Dropdown */}
+              <select 
+                name="state"
+                value={state}
+                onChange={(e) => setState(e.target.value)}
+                className="h-9 px-3 rounded bg-white outline-none appearance-none"
+              >
+                <option value="">Select State</option>
+                <option value="Gujarat">Gujarat</option>
+                <option value="Maharashtra">Maharashtra</option>
+                <option value="Rajasthan">Rajasthan</option>
+                <option value="Madhya Pradesh">Madhya Pradesh</option>
+                <option value="Delhi">Delhi</option>
+              </select>
+            </div>
 
             <input name="emailWebsite" className="h-9 px-3 rounded bg-white outline-none" placeholder="email / website :" />
           </div>
+
 
           {/* PDF + Call Section */}
           <div className="flex items-center gap-3 mt-3 px-8">

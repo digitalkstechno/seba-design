@@ -67,7 +67,7 @@ const Search = () => {
             else if (area) query = `?area=${area}`;
             
             setTimeout(() => {
-                router.push(`/member${query}`);
+                router.push(`/search/results${query}`);
             }, 500);
         }
     };
@@ -258,10 +258,21 @@ const Search = () => {
                     </div>
 
                     <button
-                        onClick={() => router.push('/advertisement')}
-                        className="flex flex-col items-center cursor-pointer opacity-90 hover:opacity-100">
+                        onClick={() => {
+                            if (navigator.share) {
+                                navigator.share({
+                                    title: 'SEBA - Search Zone',
+                                    url: window.location.href
+                                }).catch(console.error);
+                            } else {
+                                navigator.clipboard.writeText(window.location.href);
+                                alert("Link copied!");
+                            }
+                        }}
+                        className="flex flex-col items-center cursor-pointer opacity-90 hover:opacity-100"
+                    >
                         <BsShare className="text-lg" />
-                        <span className="text-[10px] mt-1">share</span>
+                        <span className="text-[10px] mt-1 font-bold">share</span>
                     </button>
                 </div>
             </div>
