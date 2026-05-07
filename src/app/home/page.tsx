@@ -246,11 +246,21 @@ const HomeContent = () => {
             </div>
 
             <button
-              onClick={() => router.push("/advertisement")}
+              onClick={() => {
+                if (navigator.share) {
+                  navigator.share({
+                    title: 'SEBA - Surat East Builder Association',
+                    url: window.location.href
+                  }).catch(console.error);
+                } else {
+                  navigator.clipboard.writeText(window.location.href);
+                  alert("Link copied to clipboard!");
+                }
+              }}
               className="flex flex-col items-center cursor-pointer opacity-90 hover:opacity-100"
             >
               <BsShare className="text-lg" />
-              <span className="text-[10px] mt-1">share</span>
+              <span className="text-[10px] mt-1 font-bold">share</span>
             </button>
           </div>
         </div>

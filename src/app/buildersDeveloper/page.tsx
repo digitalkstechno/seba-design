@@ -166,7 +166,17 @@ const BuildersDeveloper: FC = () => {
         </div>
 
         {/* Bottom Nav */}
-        <BottomNav onShare={() => router.push('/advertisement')} />
+        <BottomNav onShare={() => {
+          if (navigator.share) {
+            navigator.share({
+              title: 'SEBA - Builders & Developers',
+              url: window.location.href
+            }).catch(console.error);
+          } else {
+            navigator.clipboard.writeText(window.location.href);
+            alert("Link copied to clipboard!");
+          }
+        }} />
 
       </div>
     </div>

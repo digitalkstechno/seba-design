@@ -137,7 +137,17 @@ const Associated: FC = () => {
 
           <BottomNavItem
             label="share"
-            onClick={() => router.push('/advertisement')}
+            onClick={() => {
+              if (navigator.share) {
+                navigator.share({
+                  title: 'SEBA - Associated Associations',
+                  url: window.location.href
+                }).catch(console.error);
+              } else {
+                navigator.clipboard.writeText(window.location.href);
+                alert("Link copied to clipboard!");
+              }
+            }}
           >
             <BsShare className="text-lg" />
           </BottomNavItem>
