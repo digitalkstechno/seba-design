@@ -170,6 +170,7 @@ const NewMember: FC = () => {
     // 5. Member Details Section
     const fields = [
       { label: "FULL NAME", value: formData.get('name'), icon: "👤" },
+      { label: "COMPANY NAME", value: formData.get('company'), icon: "🏢" },
       { label: "DESIGNATION", value: formData.get('position'), icon: "💼" },
       { label: "BUSINESS CATEGORY", value: showOtherCategory ? formData.get('otherCategory') : categorySelection, icon: "🏢" },
       { label: "PRIMARY MOBILE", value: formData.get('mobile'), icon: "📱" },
@@ -319,40 +320,43 @@ const NewMember: FC = () => {
 
           {/* Form */}
           <div className="mt-3 flex flex-col gap-2 text-[13px]">
-            <input name="name" required className="h-9 px-3 rounded bg-white outline-none" placeholder="Full Name :" />
-            <input name="position" className="h-9 px-3 rounded bg-white outline-none" placeholder="Position :" />
+            <input name="name" required className="h-9 px-3 rounded bg-white outline-none border-l-4 border-[#0b4b4b]" placeholder="Full Name :" />
+            <input name="company" required className="h-9 px-3 rounded bg-white outline-none font-bold border-l-4 border-[#0b4b4b]" placeholder="Company Name :" />
+            <input name="position" className="h-9 px-3 rounded bg-white outline-none border-l-4 border-[#0b4b4b]" placeholder="Position :" />
             
             <div className="flex flex-col gap-1">
-              <SearchableSelect 
-                options={categories}
-                value={categorySelection}
-                onChange={(val) => {
-                  setCategorySelection(val)
-                  setShowOtherCategory(val === 'Others')
-                }}
-                placeholder="Select Category :"
-                triggerStyle={{
-                  borderRadius: '0.25rem', // Match 'rounded' class
-                  height: '2.25rem', // Match 'h-9'
-                  backgroundColor: 'white',
-                  border: 'none',
-                  paddingLeft: '0.75rem',
-                  paddingRight: '0.75rem'
-                }}
-              />
+              <div className="border-l-4 border-[#0b4b4b] rounded">
+                <SearchableSelect 
+                  options={categories}
+                  value={categorySelection}
+                  onChange={(val) => {
+                    setCategorySelection(val)
+                    setShowOtherCategory(val === 'Others')
+                  }}
+                  placeholder="Select Category :"
+                  triggerStyle={{
+                    borderRadius: '0 0.25rem 0.25rem 0', 
+                    height: '2.25rem',
+                    backgroundColor: 'white',
+                    border: 'none',
+                    paddingLeft: '0.75rem',
+                    paddingRight: '0.75rem'
+                  }}
+                />
+              </div>
               {showOtherCategory && (
                 <input 
                   name="otherCategory" 
                   required 
-                  className="h-9 px-3 rounded bg-white outline-none border border-indigo-200" 
+                  className="h-9 px-3 rounded bg-white outline-none border-l-4 border-red-500" 
                   placeholder="Enter Category Name :" 
                 />
               )}
             </div>
 
-            <input name="mobile" required className="h-9 px-3 rounded bg-white outline-none" placeholder="Contact No. :" />
+            <input name="mobile" required className="h-9 px-3 rounded bg-white outline-none border-l-4 border-[#0b4b4b]" placeholder="Contact No. :" />
             
-            <input name="officeNo" className="h-9 px-3 rounded bg-white outline-none" placeholder="Office / Shop No. :" />
+            <input name="officeNo" className="h-9 px-3 rounded bg-white outline-none border-l-4 border-[#0b4b4b]" placeholder="Office / Shop No. :" />
 
             <input 
               name="pincode" 
@@ -369,12 +373,12 @@ const NewMember: FC = () => {
                         const post = data[0].PostOffice[0];
                         setCity(post.District);
                         setState(post.State);
-                        setAreaValue(post.Name); // Neighborhood/Area
+                        setAreaValue(post.Name);
                       }
                     });
                 }
               }}
-              className="h-9 px-3 rounded bg-white outline-none border border-blue-100" 
+              className="h-9 px-3 rounded bg-white outline-none border-l-4 border-blue-500" 
               placeholder="Pincode : (Auto-fills Area/City/State)" 
             />
 
@@ -383,52 +387,36 @@ const NewMember: FC = () => {
               required 
               value={areaValue}
               onChange={(e) => setAreaValue(e.target.value)}
-              className="h-9 px-3 rounded bg-white outline-none" 
+              className="h-9 px-3 rounded bg-white outline-none border-l-4 border-[#0b4b4b]" 
               placeholder="Area / Locality :" 
             />
 
             <textarea
               name="address"
               required
-              className="h-16 px-3 py-2 rounded bg-white outline-none resize-none"
+              className="h-16 px-3 py-2 rounded bg-white outline-none resize-none border-l-4 border-[#0b4b4b]"
               placeholder="Full Office Address :"
             />
 
             <div className="grid grid-cols-2 gap-2">
-              {/* City Dropdown */}
-              <select 
+              <input 
                 name="city"
                 value={city}
                 onChange={(e) => setCity(e.target.value)}
-                className="h-9 px-3 rounded bg-white outline-none appearance-none"
-              >
-                <option value="">Select City</option>
-                <option value="Surat">Surat</option>
-                <option value="Ahmedabad">Ahmedabad</option>
-                <option value="Vadodara">Vadodara</option>
-                <option value="Rajkot">Rajkot</option>
-                <option value="Mumbai">Mumbai</option>
-                <option value="Pune">Pune</option>
-                <option value="Delhi">Delhi</option>
-              </select>
+                className="h-9 px-3 rounded bg-white outline-none border-l-4 border-[#0b4b4b]"
+                placeholder="City :"
+              />
 
-              {/* State Dropdown */}
-              <select 
+              <input 
                 name="state"
                 value={state}
                 onChange={(e) => setState(e.target.value)}
-                className="h-9 px-3 rounded bg-white outline-none appearance-none"
-              >
-                <option value="">Select State</option>
-                <option value="Gujarat">Gujarat</option>
-                <option value="Maharashtra">Maharashtra</option>
-                <option value="Rajasthan">Rajasthan</option>
-                <option value="Madhya Pradesh">Madhya Pradesh</option>
-                <option value="Delhi">Delhi</option>
-              </select>
+                className="h-9 px-3 rounded bg-white outline-none border-l-4 border-[#0b4b4b]"
+                placeholder="State :"
+              />
             </div>
 
-            <input name="emailWebsite" className="h-9 px-3 rounded bg-white outline-none" placeholder="email / website :" />
+            <input name="emailWebsite" className="h-9 px-3 rounded bg-white outline-none border-l-4 border-[#0b4b4b]" placeholder="email / website :" />
           </div>
 
 

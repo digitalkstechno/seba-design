@@ -15,6 +15,10 @@ type Member = {
   name: string
   company: string
   address: string
+  area?: string
+  city?: string
+  state?: string
+  pincode?: string
   image: string
   hasNfcCard: boolean
   cardId: string | null
@@ -43,6 +47,10 @@ const ResultsContent: FC = () => {
             name: item.name,
             company: item.company,
             address: item.address,
+            area: item.area,
+            city: item.city,
+            state: item.state,
+            pincode: item.pincode,
             image: item.image ? `${process.env.NEXT_PUBLIC_IMAGE_URL}/builder/${item.image}` : "/images/member.webp",
             hasNfcCard: item.hasNfcCard,
             cardId: item.cardId
@@ -89,57 +97,58 @@ const ResultsContent: FC = () => {
           ) : members.map((member) => (
             <div key={member.id} className="flex items-center">
               {/* Card */}
-              <div className="bg-white rounded-xl flex items-center shadow-sm border border-gray-100 h-[70px] flex-1 overflow-hidden relative">
+              <div className="bg-white rounded-[35px] flex items-center shadow-sm border border-gray-100 h-[75px] flex-1 overflow-hidden relative">
                 {/* Profile */}
                 <div className="pl-2 shrink-0">
-                  <div className="w-[60px] h-[60px] rounded-full border-[1.5px] border-[#00a9e0] overflow-hidden">
+                  <div className="w-[62px] h-[62px] rounded-full border-[1.5px] border-[#00a9e0] overflow-hidden p-[1px]">
                     <img
                       src={member.image}
                       alt={member.name}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full rounded-full object-cover"
                     />
                   </div>
                 </div>
 
                 {/* Content */}
-                <div className="flex-1 ml-3 pr-2 min-w-0">
-                  <div className="border-b border-[#00a9e0]">
-                    <p className="font-bold text-[11px] truncate uppercase">
+                <div className="flex-1 ml-3 pr-8 min-w-0 flex flex-col justify-center">
+                  <div className="border-b-[1.5px] border-[#00a9e0] pb-[1px] mb-[1px]">
+                    <p className="font-bold text-[12px] truncate uppercase leading-tight text-black">
                       {member.name}
                     </p>
                   </div>
-                  <div className="border-b border-[#00a9e0] py-[1px]">
-                    <p className="text-[10px] font-semibold truncate uppercase text-gray-700">
+                  <div className="border-b-[1.5px] border-[#00a9e0] py-[1px]">
+                    <p className="text-[11px] font-bold truncate uppercase text-gray-800 leading-tight">
                       {member.company}
                     </p>
                   </div>
-                  <p className="text-[9px] font-semibold truncate text-gray-400 mt-0.5 italic">
-                    {member.address}
+                  <p className="text-[10px] font-semibold truncate text-gray-500 mt-[2px] italic leading-tight">
+                    {[member.address, member.area, member.city, member.state, member.pincode].filter(Boolean).join(', ')}
                   </p>
                 </div>
-              </div>
 
-              {/* NFC Arrow */}
-              {member.hasNfcCard && (
-                <div 
-                  onClick={() => router.push(`/memberDetail?id=${member.id}`)}
-                  className="ml-[2px] flex items-center cursor-pointer active:scale-95 transition-transform"
-                >
-                  <div
-                    className="relative w-[28px] h-[35px] flex items-center justify-center"
-                    style={{
-                      clipPath: 'polygon(0% 0%, 100% 50%, 0% 100%)',
-                      background: 'linear-gradient(to bottom, #e31e24 50%, #a11c1f 50%)'
-                    }}
+                {/* Detail Arrow - Only for NFC Card holders */}
+                {member.hasNfcCard && (
+                  <div 
+                    onClick={() => router.push(`/memberDetail?id=${member.id}`)}
+                    className="absolute right-0 top-1/2 -translate-y-1/2 flex items-center cursor-pointer active:scale-95 transition-transform"
                   >
-                    <div className="absolute left-[2px] top-1/2 -translate-y-1/2 w-[7px] h-[7px] bg-white border border-[#a11c1f] rounded-full" />
-                    <RiWifiFill
-                      className="text-white text-[14px] ml-[4px]"
-                      style={{ transform: "rotate(90deg)" }}
-                    />
+                    <div
+                      className="relative w-[40px] h-[52px] flex items-center justify-center drop-shadow-lg"
+                      style={{
+                        clipPath: 'polygon(0% 0%, 100% 50%, 0% 100%)',
+                        background: 'linear-gradient(to right, #e31e24, #881519)'
+                      }}
+                    >
+                      <div className="absolute left-[4px] top-1/2 -translate-y-1/2 w-[6px] h-[6px] bg-white rounded-full shadow-sm" />
+                      <RiWifiFill
+                        className="text-white text-[22px] ml-[6px]"
+                        style={{ transform: "rotate(90deg)" }}
+                      />
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
+
+              </div>
             </div>
           ))}
 

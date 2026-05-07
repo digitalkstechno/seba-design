@@ -94,7 +94,7 @@ const MemberDetailContent = () => {
                         <div className="w-[1px] bg-gray-300"></div>
                         <div className="flex-1 bg-[#e8eff1] flex items-center px-4 py-2 border-y border-r border-gray-300 rounded-r-full shadow-sm ml-[1px]">
                             <span className="text-[11px] font-bold text-gray-700 leading-tight">
-                                {member.address || "No address provided"}
+                                {[member.address, member.area, member.city, member.state, member.pincode].filter(Boolean).join(', ') || "No address provided"}
                             </span>
                         </div>
                     </div>

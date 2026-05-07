@@ -51,8 +51,8 @@ const FooterSponsors = ({ type }: { type?: 'sponsor' | 'co-sponsor' }) => {
       <div 
         className={`rounded-2xl shadow-xl flex justify-center overflow-hidden border ${
           isCoSponsor 
-            ? "bg-[#fce591] border-[#d4b958] h-[140px]" 
-            : "bg-[#0b4b4b] border-[#002a2a] h-[120px]"
+            ? "bg-white/90 border-[#d4b958] h-[140px]" 
+            : "bg-white/80 border-[#0b4b4b] h-[120px]"
         }`}
       >
         <img
