@@ -1,37 +1,52 @@
 "use client";
 
-import { FC, FormEvent, useState } from "react";
+import { FC, FormEvent, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { FaUser, FaMobileAlt, FaPlay } from "react-icons/fa";
 import api from "@/lib/axios";
+import { formatPhoneNumber, cleanPhoneNumber } from "@/lib/phoneUtils";
 
 const Login: FC = () => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [mobile, setMobile] = useState(formatPhoneNumber(""));
+
+  useEffect(() => {
+    const name = sessionStorage.getItem("seba_user_name");
+    const mob = sessionStorage.getItem("seba_user_mobile");
+    if (name && mob) {
+      router.replace("/home");
+    }
+  }, [router]);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const name = formData.get('name') as string;
-    const mobile = formData.get('mobile') as string;
+    const cleanedMobile = cleanPhoneNumber(mobile);
+
+    if (cleanedMobile.length !== 10) {
+      setError("Please enter a valid 10-digit mobile number");
+      return;
+    }
 
     setLoading(true);
     setError("");
     
     // Always store details to skip splash next time if needed
-    localStorage.setItem("seba_user_name", name);
-    localStorage.setItem("seba_user_mobile", mobile);
+    sessionStorage.setItem("seba_user_name", name);
+    sessionStorage.setItem("seba_user_mobile", cleanedMobile);
 
     try {
-      const response = await api.post("/seba/user/login", { name, mobile });
+      const response = await api.post("/seba/user/login", { name, mobile: cleanedMobile });
       if (response.data.status === "Success") {
-        localStorage.setItem("seba_token", response.data.data.token);
+        sessionStorage.setItem("seba_token", response.data.data.token);
       }
     } catch (err: any) {
       console.log("Not a member, proceeding as guest");
       // Clear token if it exists from a previous login
-      localStorage.removeItem("seba_token");
+      sessionStorage.removeItem("seba_token");
     } finally {
       setLoading(false);
       router.push("/home");
@@ -100,7 +115,8 @@ const Login: FC = () => {
                   name="mobile"
                   placeholder="Mobile Number"
                   className="w-full bg-transparent px-3 py-2 text-sm outline-none"
-                  pattern="[0-9]{10}"
+                  value={mobile}
+                  onChange={(e) => setMobile(formatPhoneNumber(e.target.value))}
                   required
                 />
               </div>

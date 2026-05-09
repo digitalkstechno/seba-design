@@ -79,7 +79,7 @@ const HomeContent = () => {
 
   const handleMenuClick = (item: any) => {
     if (item.label === "Members") {
-      const token = localStorage.getItem("seba_token");
+      const token = sessionStorage.getItem("seba_token");
       if (!token) {
         setShowRestriction(true);
         return;

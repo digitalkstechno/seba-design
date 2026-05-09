@@ -7,7 +7,7 @@ const api = axios.create({
 // Request interceptor to add token if exists
 api.interceptors.request.use((config) => {
   if (typeof window !== 'undefined') {
-    const token = localStorage.getItem('seba_token');
+    const token = sessionStorage.getItem('seba_token');
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
     }

@@ -3,6 +3,7 @@
 import { FC, useState, FormEvent, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import api from "@/lib/axios"
+import { formatPhoneNumber, cleanPhoneNumber } from "@/lib/phoneUtils"
 import { BsGlobe, BsShare } from "react-icons/bs"
 import { HiOutlinePhone } from "react-icons/hi"
 import { FaFilePdf } from "react-icons/fa"
@@ -73,6 +74,8 @@ const NewMember: FC = () => {
   const [pincode, setPincode] = useState("")
   const [city, setCity] = useState("Surat")
   const [state, setState] = useState("Gujarat")
+  const [mobile, setMobile] = useState(formatPhoneNumber(""))
+  const [officeNo, setOfficeNo] = useState(formatPhoneNumber(""))
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -194,8 +197,8 @@ const NewMember: FC = () => {
       { label: "COMPANY NAME", value: formData.get('company'), icon: "🏢" },
       { label: "DESIGNATION", value: formData.get('position'), icon: "💼" },
       { label: "BUSINESS CATEGORY", value: showOtherCategory ? formData.get('otherCategory') : categorySelection, icon: "🏢" },
-      { label: "PRIMARY MOBILE", value: formData.get('mobile'), icon: "📱" },
-      { label: "OFFICE NUMBER", value: formData.get('officeNo'), icon: "📞" },
+      { label: "PRIMARY MOBILE", value: formatPhoneNumber(formData.get('mobile') as string), icon: "📱" },
+      { label: "OFFICE NUMBER", value: formData.get('officeNo') ? formatPhoneNumber(formData.get('officeNo') as string) : "", icon: "📞" },
       { label: "OPERATIONAL AREA", value: formData.get('area'), icon: "📍" },
       { label: "OFFICE ADDRESS", value: formData.get('address'), icon: "🏠" },
       { label: "PINCODE", value: formData.get('pincode'), icon: "🔢" },
@@ -296,11 +299,17 @@ const NewMember: FC = () => {
       formData.set('city', city)
       formData.set('state', state)
 
+      const cleanedMobile = cleanPhoneNumber(mobile)
+      const cleanedOfficeNo = cleanPhoneNumber(officeNo)
+
+      formData.set('mobile', cleanedMobile)
+      formData.set('officeNo', cleanedOfficeNo)
+
       const { data } = await api.post('/seba/member/new', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       })
       if (data.status === 'Success') {
-        localStorage.setItem("seba_registered", "true")
+        sessionStorage.setItem("seba_registered", "true")
         showAlert("Member application submitted successfully!")
         router.push("/home")
       }
@@ -400,9 +409,22 @@ const NewMember: FC = () => {
               )}
             </div>
 
-            <input name="mobile" required className="h-9 px-3 rounded bg-white outline-none border-l-4 border-[#0b4b4b]" placeholder="Contact No. :" />
+            <input 
+              name="mobile" 
+              required 
+              className="h-9 px-3 rounded bg-white outline-none border-l-4 border-[#0b4b4b]" 
+              placeholder="Contact No. :" 
+              value={mobile}
+              onChange={(e) => setMobile(formatPhoneNumber(e.target.value))}
+            />
             
-            <input name="officeNo" className="h-9 px-3 rounded bg-white outline-none border-l-4 border-[#0b4b4b]" placeholder="Office / Shop No. :" />
+            <input 
+              name="officeNo" 
+              className="h-9 px-3 rounded bg-white outline-none border-l-4 border-[#0b4b4b]" 
+              placeholder="Office / Shop No. :" 
+              value={officeNo}
+              onChange={(e) => setOfficeNo(formatPhoneNumber(e.target.value))}
+            />
 
             <input 
               name="pincode" 

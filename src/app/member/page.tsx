@@ -32,7 +32,7 @@ const MemberContent: FC = () => {
   const [searchTerm, setSearchTerm] = useState("")
 
   useEffect(() => {
-    const token = localStorage.getItem("seba_token");
+    const token = sessionStorage.getItem("seba_token");
     if (!token) {
       router.push("/home?restricted=true");
     }

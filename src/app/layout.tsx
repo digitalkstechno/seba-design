@@ -18,6 +18,7 @@ export const metadata: Metadata = {
 };
 
 import { AlertProvider } from "@/context/AlertContext";
+import RouteGuard from "@/components/RouteGuard";
 
 export default function RootLayout({
   children,
@@ -31,7 +32,9 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <AlertProvider>
-          {children}
+          <RouteGuard>
+            {children}
+          </RouteGuard>
         </AlertProvider>
       </body>
     </html>
