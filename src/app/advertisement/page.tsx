@@ -3,6 +3,7 @@
 import { FC } from "react"
 import { useRouter } from "next/navigation"
 import { IoIosArrowBack } from "react-icons/io"
+import Footer from "@/components/Footer"
 
 // Types
 type Section = {
@@ -99,12 +100,7 @@ const Advertisement: FC = () => {
           ))}
         </div>
 
-        {/* Bottom Fixed Banner */}
-        <div className="absolute bottom-0 left-0 w-full bg-[#003c3c] py-3 text-center">
-          <span className="text-2xl font-bold text-white tracking-wide">
-            Advertisement
-          </span>
-        </div>
+        <Footer />
 
       </div>
     </div>

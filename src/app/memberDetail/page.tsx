@@ -8,6 +8,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { LuLayoutDashboard } from "react-icons/lu";
 import { IoIosArrowBack } from "react-icons/io";
 import api from "@/lib/axios";
+import Footer from "@/components/Footer";
 
 const MemberDetailContent = () => {
     const router = useRouter();
@@ -178,42 +179,7 @@ const MemberDetailContent = () => {
                     </div>
                 </div>
 
-                {/* Bottom Navigation */}
-                <div className="bg-[#003d3d] mt-auto -mx-5 px-6 py-3 flex justify-between items-center text-white fixed bottom-0 w-[420px]">
-                    <div onClick={() => router.push('/home')} className="flex flex-col items-center cursor-pointer">
-                        <AiOutlineHome className="text-xl" />
-                        <span className="text-[10px] mt-1 font-bold">home</span>
-                    </div>
-                    <div className="flex flex-col items-center cursor-pointer">
-                        <img src="/images/seba-link1.png" alt="app" className="w-8 h-8 object-contain" />
-                        <span className="text-[10px] -mt-1 font-bold">app link</span>
-                    </div>
-                    <div className="flex flex-col items-center cursor-pointer">
-                        <BsGlobe className="text-xl" />
-                        <span className="text-[10px] mt-1 font-bold">www.seba</span>
-                    </div>
-                    <div className="flex flex-col items-center cursor-pointer">
-                        <LuLayoutDashboard className="text-xl" />
-                        <span className="text-[10px] mt-1 font-bold">dropbox</span>
-                    </div>
-                    <button
-                        onClick={() => {
-                            if (navigator.share) {
-                                navigator.share({
-                                    title: 'SEBA - Member Details',
-                                    url: window.location.href
-                                }).catch(console.error);
-                            } else {
-                                navigator.clipboard.writeText(window.location.href);
-                                alert("Link copied to clipboard!");
-                            }
-                        }}
-                        className="flex flex-col items-center cursor-pointer"
-                    >
-                        <BsShare className="text-lg" />
-                        <span className="text-[10px] mt-1 font-bold">share</span>
-                    </button>
-                </div>
+                <Footer />
             </div>
             
             <style jsx>{`

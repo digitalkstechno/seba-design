@@ -7,6 +7,7 @@ import { AiOutlineHome } from "react-icons/ai"
 import { BsGlobe, BsShare } from "react-icons/bs"
 import { IoIosArrowBack } from "react-icons/io"
 import { LuLayoutDashboard } from "react-icons/lu"
+import Footer from "@/components/Footer"
 
 // Types
 type Association = {
@@ -15,14 +16,6 @@ type Association = {
 }
 
 type AssociationCardProps = Association
-
-type BottomNavItemProps = {
-  children: ReactNode
-  label: string
-  onClick?: () => void
-}
-
-// Data (Removed static array)
 
 // Components
 const AssociationCard: FC<AssociationCardProps> = ({ name, img }) => (
@@ -41,15 +34,6 @@ const AssociationCard: FC<AssociationCardProps> = ({ name, img }) => (
   </div>
 )
 
-const BottomNavItem: FC<BottomNavItemProps> = ({ children, label, onClick }) => (
-  <div
-    onClick={onClick}
-    className="flex flex-col items-center cursor-pointer opacity-90 hover:opacity-100"
-  >
-    {children}
-    <span className="text-[10px] mt-1">{label}</span>
-  </div>
-)
 
 // Main Component
 const Associated: FC = () => {
@@ -104,54 +88,19 @@ const Associated: FC = () => {
         </div>
 
         {/* Grid */}
-        <div className="grid grid-cols-3 gap-4 mt-10">
-          {associations.map((item, index) => (
-            <AssociationCard
-              key={index}
-              name={item.name}
-              img={item.img}
-            />
-          ))}
+        <div className="flex-1 overflow-y-auto no-scrollbar pb-20">
+          <div className="grid grid-cols-3 gap-4 mt-10">
+            {associations.map((item, index) => (
+              <AssociationCard
+                key={index}
+                name={item.name}
+                img={item.img}
+              />
+            ))}
+          </div>
         </div>
 
-        <div className="bg-[#003d3d] mt-auto -mx-5 px-6 py-3 flex justify-between items-center text-white">
-          <BottomNavItem label="home" onClick={() => router.push('/home')}>
-            <AiOutlineHome className="text-xl" />
-          </BottomNavItem>
-
-          <BottomNavItem label="App Link">
-            <img
-              src="/images/seba-link1.png"
-              alt="app link"
-              className="w-8 h-8 object-contain"
-            />
-          </BottomNavItem>
-
-          <BottomNavItem label="www.seba">
-            <BsGlobe className="text-xl" />
-          </BottomNavItem>
-
-          <BottomNavItem label="dropbox">
-            <LuLayoutDashboard className="text-xl" />
-          </BottomNavItem>
-
-          <BottomNavItem
-            label="share"
-            onClick={() => {
-              if (navigator.share) {
-                navigator.share({
-                  title: 'SEBA - Associated Associations',
-                  url: window.location.href
-                }).catch(console.error);
-              } else {
-                navigator.clipboard.writeText(window.location.href);
-                alert("Link copied to clipboard!");
-              }
-            }}
-          >
-            <BsShare className="text-lg" />
-          </BottomNavItem>
-        </div>
+        <Footer />
 
       </div>
     </div>

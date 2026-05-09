@@ -12,6 +12,8 @@ import { IoIosArrowBack } from "react-icons/io"
 import { jsPDF } from "jspdf"
 import SearchableSelect from "@/components/SearchableSelect"
 import Cropper, { Area } from 'react-easy-crop'
+import Footer from "@/components/Footer"
+import { useAlert } from "@/context/AlertContext"
 
 const getCroppedImg = (
   imageSrc: string,
@@ -50,6 +52,7 @@ const getCroppedImg = (
 
 const NewMember: FC = () => {
   const router = useRouter()
+  const { showAlert } = useAlert()
   const formRef = useRef<HTMLFormElement>(null)
   const [loading, setLoading] = useState(false)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
@@ -126,24 +129,57 @@ const NewMember: FC = () => {
     const pageWidth = doc.internal.pageSize.getWidth()
     const pageHeight = doc.internal.pageSize.getHeight()
 
+    // Function to load image as base64
+    const getImageData = (url: string): Promise<string> => {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.crossOrigin = "Anonymous";
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          canvas.width = img.width;
+          canvas.height = img.height;
+          const ctx = canvas.getContext("2d");
+          if (ctx) {
+            ctx.drawImage(img, 0, 0);
+            resolve(canvas.toDataURL("image/png"));
+          } else {
+            reject("Could not get canvas context");
+          }
+        };
+        img.onerror = () => reject("Could not load image");
+        img.src = url;
+      });
+    };
+
     // 1. Decorative Background Elements
     doc.setFillColor(11, 75, 75) // Theme Color #0b4b4b
     doc.rect(0, 0, 15, pageHeight, 'F') // Vertical Sidebar
     
-    // 2. Header Section
+    // 2. Header Section with Logo
+    try {
+      const logoData = await getImageData("/images/logo.png");
+      doc.addImage(logoData, 'PNG', 20, 15, 20, 20);
+    } catch (e) {
+      console.error("Logo failed to load for PDF", e);
+      doc.setFont("helvetica", "bold")
+      doc.setFontSize(24)
+      doc.setTextColor(11, 75, 75)
+      doc.text("SEBA", 25, 25)
+    }
+
     doc.setFont("helvetica", "bold")
-    doc.setFontSize(28)
+    doc.setFontSize(22)
     doc.setTextColor(11, 75, 75)
-    doc.text("SEBA", 25, 25)
+    doc.text("SEBA", 45, 27)
     
-    doc.setFontSize(10)
+    doc.setFontSize(9)
     doc.setTextColor(100, 100, 100)
     doc.setFont("helvetica", "italic")
-    doc.text("Surat East Builder Association", 25, 32)
+    doc.text("Surat East Builder Association", 45, 33)
     
     doc.setDrawColor(11, 75, 75)
     doc.setLineWidth(0.5)
-    doc.line(25, 38, 190, 38)
+    doc.line(20, 40, 190, 40)
 
     // 3. Document Title
     doc.setFont("helvetica", "bold")
@@ -151,21 +187,6 @@ const NewMember: FC = () => {
     doc.setTextColor(50, 50, 50)
     doc.text("MEMBERSHIP APPLICATION FORM", 25, 52)
 
-    // 4. Member Photo
-    if (imagePreview) {
-      try {
-        // Shadow effect for photo
-        doc.setFillColor(240, 240, 240)
-        doc.rect(152, 47, 40, 50, 'F')
-        
-        doc.addImage(imagePreview, 'JPEG', 150, 45, 40, 50)
-        doc.setDrawColor(11, 75, 75)
-        doc.setLineWidth(0.8)
-        doc.rect(150, 45, 40, 50)
-      } catch (e) {
-        console.error("PDF Image add failed", e)
-      }
-    }
 
     // 5. Member Details Section
     const fields = [
@@ -177,32 +198,57 @@ const NewMember: FC = () => {
       { label: "OFFICE NUMBER", value: formData.get('officeNo'), icon: "📞" },
       { label: "OPERATIONAL AREA", value: formData.get('area'), icon: "📍" },
       { label: "OFFICE ADDRESS", value: formData.get('address'), icon: "🏠" },
+      { label: "PINCODE", value: formData.get('pincode'), icon: "🔢" },
+      { label: "CITY", value: formData.get('city'), icon: "🏙️" },
+      { label: "STATE", value: formData.get('state'), icon: "🗺️" },
       { label: "EMAIL / WEBSITE", value: formData.get('emailWebsite'), icon: "🌐" },
     ]
 
-    let y = 70
+    let y = 65
     fields.forEach((field, index) => {
+      const rawVal = field.value?.toString().trim()
+      const val = rawVal && rawVal !== "" ? rawVal : ""
+      const splitText = doc.splitTextToSize(val, index < 6 ? 110 : 160) // Wider if below photo
+      
+      // Calculate dynamic height for this row
+      const rowHeight = (splitText.length * 5) + 8
+
       // Background for alternate rows
       if (index % 2 === 0) {
         doc.setFillColor(245, 248, 248)
-        doc.rect(25, y - 6, 115, 12, 'F')
+        doc.rect(20, y - 5, 170, rowHeight, 'F')
       }
 
+      // Label
       doc.setFont("helvetica", "bold")
-      doc.setFontSize(9)
+      doc.setFontSize(8.5)
       doc.setTextColor(11, 75, 75)
-      doc.text(field.label, 30, y)
+      doc.text(field.label, 25, y)
       
+      // Value
       doc.setFont("helvetica", "normal")
-      doc.setFontSize(11)
-      doc.setTextColor(0, 0, 0)
+      doc.setFontSize(10)
+      doc.setTextColor(40, 40, 40)
+      doc.text(splitText, 25, y + 5)
       
-      const val = field.value?.toString() || "N/A"
-      const splitText = doc.splitTextToSize(val, 80)
-      doc.text(splitText, 30, y + 6)
-      
-      y += (splitText.length * 6) + 12
+      y += rowHeight + 2 // Extra gap between rows
     })
+
+    // 6. Member Photo (Drawn after fields to ensure it's on top of backgrounds)
+    if (imagePreview) {
+      try {
+        // Shadow effect for photo
+        doc.setFillColor(230, 230, 230)
+        doc.rect(152, 47, 40, 50, 'F')
+        
+        doc.addImage(imagePreview, 'JPEG', 150, 45, 40, 50)
+        doc.setDrawColor(11, 75, 75)
+        doc.setLineWidth(0.8)
+        doc.rect(150, 45, 40, 50)
+      } catch (e) {
+        console.error("PDF Image add failed", e)
+      }
+    }
 
     // 6. Footer Section
     doc.setFillColor(11, 75, 75)
@@ -255,11 +301,11 @@ const NewMember: FC = () => {
       })
       if (data.status === 'Success') {
         localStorage.setItem("seba_registered", "true")
-        alert("Member application submitted successfully!")
+        showAlert("Member application submitted successfully!")
         router.push("/home")
       }
     } catch (err: any) {
-      alert(err.response?.data?.message || "Failed to submit application")
+      showAlert(err.response?.data?.message || "Failed to submit application")
     } finally {
       setLoading(false)
     }
@@ -294,7 +340,7 @@ const NewMember: FC = () => {
           </p>
         </div>
 
-        <form ref={formRef} onSubmit={handleSubmit} className="flex-1 flex flex-col overflow-y-auto no-scrollbar pb-6">
+        <form ref={formRef} onSubmit={handleSubmit} className="flex-1 flex flex-col overflow-y-auto pb-32">
           {/* Upload Box */}
           <div className="absolute right-4 top-[90px] w-[120px] h-[130px] border-2 border-blue-400 rounded-lg bg-white shadow-sm flex flex-col items-center justify-center text-center text-[12px] overflow-hidden">
             {imagePreview ? (
@@ -458,51 +504,7 @@ const NewMember: FC = () => {
           </button>
         </form>
 
-          <div className="bg-[#003d3d] mt-auto -mx-5 px-6 py-3 flex justify-between items-center text-white">
-
-          <div onClick={() => router.push('/home')} className="flex flex-col items-center cursor-pointer opacity-90 hover:opacity-100">
-            <AiOutlineHome className="text-xl" />
-            <span className="text-[10px] mt-1">home</span>
-          </div>
-
-          <div className="flex flex-col items-center cursor-pointer opacity-90 hover:opacity-100">
-            <img
-              src="/images/seba-link1.png"
-              alt="app"
-              className="w-8 h-8 object-contain"
-            />
-            <span className="text-[10px] -mt-1">App Link</span>
-          </div>
-
-          <div className="flex flex-col items-center cursor-pointer opacity-90 hover:opacity-100">
-            <BsGlobe className="text-xl" />
-            <span className="text-[10px] mt-1">www.seba</span>
-          </div>
-
-          <div className="flex flex-col items-center cursor-pointer opacity-90 hover:opacity-100">
-            <LuLayoutDashboard className="text-xl" />
-            <span className="text-[10px] mt-1">dropbox</span>
-          </div>
-
-          <button
-            onClick={() => {
-              if (navigator.share) {
-                navigator.share({
-                  title: 'SEBA - New Member Registration',
-                  url: window.location.href
-                }).catch(console.error);
-              } else {
-                navigator.clipboard.writeText(window.location.href);
-                alert("Link copied to clipboard!");
-              }
-            }}
-            className="flex flex-col items-center cursor-pointer opacity-90 hover:opacity-100"
-          >
-            <BsShare className="text-lg" />
-            <span className="text-[10px] mt-1 font-bold">share</span>
-          </button>
-
-        </div>
+        <Footer />
 
         {showCropper && originalImage && (
           <div className="absolute inset-0 bg-[#eeeeee] z-50 flex flex-col items-center justify-start p-5 pt-10">

@@ -6,8 +6,8 @@ import api from "@/lib/axios"
 import { AiOutlineHome } from "react-icons/ai"
 import { BsGlobe, BsShare } from "react-icons/bs"
 import { IoIosArrowBack } from "react-icons/io"
-import { LuLayoutDashboard } from "react-icons/lu"
 import { FaSearch } from "react-icons/fa"
+import Footer from "@/components/Footer"
 
 // Types
 type MemberType = {
@@ -33,8 +33,7 @@ const MemberContent: FC = () => {
 
   useEffect(() => {
     const token = localStorage.getItem("seba_token");
-    const registered = localStorage.getItem("seba_registered");
-    if (!token && !registered) {
+    if (!token) {
       router.push("/home?restricted=true");
     }
   }, [router]);
@@ -111,7 +110,7 @@ const MemberContent: FC = () => {
         </div>
 
         {/* Scroll Area */}
-        <div className="flex-1 overflow-y-auto pr-1 no-scrollbar">
+        <div className="flex-1 overflow-y-auto pr-1 no-scrollbar pb-20">
 
           {members.map((member) => (
             <div key={member.id} className="mb-4 border border-gray-300 bg-white">
@@ -150,51 +149,7 @@ const MemberContent: FC = () => {
 
         </div>
 
-        <div className="bg-[#003d3d] mt-auto -mx-5 px-6 py-3 flex justify-between items-center text-white">
-
-          <div onClick={() => router.push('/home')} className="flex flex-col items-center cursor-pointer opacity-90 hover:opacity-100">
-            <AiOutlineHome className="text-xl" />
-            <span className="text-[10px] mt-1">home</span>
-          </div>
-
-          <div className="flex flex-col items-center cursor-pointer opacity-90 hover:opacity-100">
-            <img
-              src="/images/seba-link1.png"
-              alt="home"
-              className="w-8 h-8 object-contain"
-            />
-            <span className="text-[10px] -mt-1">App Link</span>
-          </div>
-
-          <div className="flex flex-col items-center cursor-pointer opacity-90 hover:opacity-100">
-            <BsGlobe className="text-xl" />
-            <span className="text-[10px] mt-1">www.seba</span>
-          </div>
-
-          <div className="flex flex-col items-center cursor-pointer opacity-90 hover:opacity-100">
-            <LuLayoutDashboard className="text-xl" />
-            <span className="text-[10px] mt-1">dropbox</span>
-          </div>
-
-          <button
-            onClick={() => {
-              if (navigator.share) {
-                navigator.share({
-                  title: 'SEBA - Members Directory',
-                  url: window.location.href
-                }).catch(console.error);
-              } else {
-                navigator.clipboard.writeText(window.location.href);
-                alert("Link copied to clipboard!");
-              }
-            }}
-            className="flex flex-col items-center cursor-pointer opacity-90 hover:opacity-100"
-          >
-            <BsShare className="text-lg" />
-            <span className="text-[10px] mt-1 font-bold">share</span>
-          </button>
-
-        </div>
+        <Footer />
 
       </div>
     </div>

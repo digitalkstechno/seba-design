@@ -44,7 +44,7 @@ const FooterSponsors = ({ type }: { type?: 'sponsor' | 'co-sponsor' }) => {
   const isCoSponsor = type === 'co-sponsor';
 
   return (
-    <div className={`mt-auto ${isCoSponsor ? "px-2" : "px-4"} pb-4`}>
+    <div className={`mt-auto ${isCoSponsor ? "px-2" : "px-4"} pb-20`}>
       <p className="text-center text-[12px] text-gray-800 font-bold italic mb-2 tracking-tight">
         :: {isCoSponsor ? "Co-Sponsored by" : label} ::
       </p>

@@ -8,6 +8,7 @@ import { BsGlobe, BsShare } from "react-icons/bs"
 import { IoIosArrowBack } from "react-icons/io"
 import { LuLayoutDashboard } from "react-icons/lu"
 import { RiWifiFill } from "react-icons/ri"
+import Footer from "@/components/Footer"
 
 // Types
 type Member = {
@@ -129,7 +130,13 @@ const ResultsContent: FC = () => {
                 {/* Detail Arrow - Only for NFC Card holders */}
                 {member.hasNfcCard && (
                   <div 
-                    onClick={() => router.push(`/memberDetail?id=${member.id}`)}
+                    onClick={() => {
+                      if (member.cardId) {
+                        window.location.href = `${process.env.NEXT_PUBLIC_CARD_URL}/${member.cardId}`;
+                      } else {
+                        router.push(`/memberDetail?id=${member.id}`);
+                      }
+                    }}
                     className="absolute right-0 top-1/2 -translate-y-1/2 flex items-center cursor-pointer active:scale-95 transition-transform"
                   >
                     <div
@@ -154,42 +161,7 @@ const ResultsContent: FC = () => {
 
         </div>
 
-        {/* Bottom Nav */}
-        <div className="bg-[#003d3d] mt-auto -mx-5 px-6 py-3 flex justify-between items-center text-white z-20">
-          <div onClick={() => router.push('/home')} className="flex flex-col items-center cursor-pointer opacity-90 hover:opacity-100">
-            <AiOutlineHome className="text-xl" />
-            <span className="text-[10px] mt-1 font-bold">home</span>
-          </div>
-          <div className="flex flex-col items-center cursor-pointer opacity-90 hover:opacity-100">
-            <img src="/images/seba-link1.png" alt="app" className="w-8 h-8 object-contain" />
-            <span className="text-[10px] -mt-1 font-bold">app link</span>
-          </div>
-          <div className="flex flex-col items-center cursor-pointer opacity-90 hover:opacity-100">
-            <BsGlobe className="text-xl" />
-            <span className="text-[10px] mt-1 font-bold">www.seba</span>
-          </div>
-          <div className="flex flex-col items-center cursor-pointer opacity-90 hover:opacity-100">
-            <LuLayoutDashboard className="text-xl" />
-            <span className="text-[10px] mt-1 font-bold">dropbox</span>
-          </div>
-          <button
-            onClick={() => {
-              if (navigator.share) {
-                navigator.share({
-                  title: 'SEBA - Search Results',
-                  url: window.location.href
-                }).catch(console.error);
-              } else {
-                navigator.clipboard.writeText(window.location.href);
-                alert("Link copied to clipboard!");
-              }
-            }}
-            className="flex flex-col items-center cursor-pointer opacity-90 hover:opacity-100"
-          >
-            <BsShare className="text-lg" />
-            <span className="text-[10px] mt-1 font-bold">share</span>
-          </button>
-        </div>
+        <Footer />
 
       </div>
       

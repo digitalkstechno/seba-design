@@ -7,6 +7,7 @@ import { BsGlobe, BsShare } from "react-icons/bs"
 import { IoIosArrowBack } from "react-icons/io"
 import { LuLayoutDashboard } from "react-icons/lu"
 import { RiWifiFill } from "react-icons/ri"
+import Footer from "@/components/Footer"
 
 // Types
 type Member = {
@@ -84,36 +85,6 @@ const MemberCard: FC<{ member: Member; onClick: () => void }> = ({ member, onCli
   </div>
 )
 
-const BottomNav: FC<{ onShare: () => void }> = ({ onShare }) => (
-  <div className="bg-[#003d3d] mt-auto -mx-5 px-6 py-3 flex justify-between items-center text-white">
-
-    <div className="flex flex-col items-center cursor-pointer">
-      <AiOutlineHome className="text-xl" />
-      <span className="text-[10px] mt-1">home</span>
-    </div>
-
-    <div className="flex flex-col items-center cursor-pointer">
-      <img src="/images/seba-link1.png" alt="app" className="w-8 h-8 object-contain" />
-      <span className="text-[10px] -mt-1">App Link</span>
-    </div>
-
-    <div className="flex flex-col items-center cursor-pointer">
-      <BsGlobe className="text-xl" />
-      <span className="text-[10px] mt-1">www.seba</span>
-    </div>
-
-    <div className="flex flex-col items-center cursor-pointer">
-      <LuLayoutDashboard className="text-xl" />
-      <span className="text-[10px] mt-1">dropbox</span>
-    </div>
-
-    <button onClick={onShare} className="flex flex-col items-center cursor-pointer">
-      <BsShare className="text-lg" />
-      <span className="text-[10px] mt-1">share</span>
-    </button>
-
-  </div>
-)
 
 // Main Component
 const BuildersDeveloper: FC = () => {
@@ -144,7 +115,7 @@ const BuildersDeveloper: FC = () => {
         </div>
 
         {/* List */}
-        <div className="flex-1 overflow-y-auto px-4 py-2 space-y-3">
+        <div className="flex-1 overflow-y-auto px-4 py-2 space-y-3 pb-20">
 
           {MEMBERS.map((member, index) => (
             <MemberCard
@@ -165,18 +136,7 @@ const BuildersDeveloper: FC = () => {
 
         </div>
 
-        {/* Bottom Nav */}
-        <BottomNav onShare={() => {
-          if (navigator.share) {
-            navigator.share({
-              title: 'SEBA - Builders & Developers',
-              url: window.location.href
-            }).catch(console.error);
-          } else {
-            navigator.clipboard.writeText(window.location.href);
-            alert("Link copied to clipboard!");
-          }
-        }} />
+        <Footer />
 
       </div>
     </div>

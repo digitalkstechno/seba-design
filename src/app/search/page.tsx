@@ -12,6 +12,7 @@ import { IoIosArrowBack } from "react-icons/io";
 import api from "@/lib/axios";
 import FooterSponsors from "@/components/FooterSponsors";
 import SearchableSelect from "@/components/SearchableSelect";
+import Footer from "@/components/Footer";
 
 const Search = () => {
     const router = useRouter();
@@ -231,50 +232,7 @@ const Search = () => {
 
                 <FooterSponsors type="co-sponsor" />
 
-                {/* Bottom Navigation Bar */}
-                <div className="bg-[#003d3d] -mx-5 px-6 py-3 flex justify-between items-center text-white">
-                    <div onClick={() => router.push('/home')} className="flex flex-col items-center cursor-pointer opacity-90 hover:opacity-100">
-                        <AiOutlineHome className="text-xl" />
-                        <span className="text-[10px] mt-1">home</span>
-                    </div>
-
-                    <div className="flex flex-col items-center cursor-pointer opacity-90 hover:opacity-100">
-                        <img
-                            src="/images/seba-link1.png"
-                            alt="home"
-                            className="w-8 h-8  object-contain"
-                        />
-                        <span className="text-[10px] -mt-1 ">App Link</span>
-                    </div>
-
-                    <div className="flex flex-col items-center cursor-pointer opacity-90 hover:opacity-100">
-                        <BsGlobe className="text-xl" />
-                        <span className="text-[10px] mt-1">www.seba</span>
-                    </div>
-
-                    <div className="flex flex-col items-center cursor-pointer opacity-90 hover:opacity-100">
-                        <LuLayoutDashboard className="text-xl" />
-                        <span className="text-[10px] mt-1">dropbox</span>
-                    </div>
-
-                    <button
-                        onClick={() => {
-                            if (navigator.share) {
-                                navigator.share({
-                                    title: 'SEBA - Search Zone',
-                                    url: window.location.href
-                                }).catch(console.error);
-                            } else {
-                                navigator.clipboard.writeText(window.location.href);
-                                alert("Link copied!");
-                            }
-                        }}
-                        className="flex flex-col items-center cursor-pointer opacity-90 hover:opacity-100"
-                    >
-                        <BsShare className="text-lg" />
-                        <span className="text-[10px] mt-1 font-bold">share</span>
-                    </button>
-                </div>
+                <Footer />
             </div>
         </div>
     )
