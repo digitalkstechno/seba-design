@@ -590,4 +590,4 @@ const NewMember: FC = () => {
   )
 }
 
-export default NewMember
+export default NewMember

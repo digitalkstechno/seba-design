@@ -16,6 +16,7 @@ const Footer: FC = () => {
     if (navigator.share) {
       navigator.share({
         title: 'SEBA - Digital Directory',
+        text: 'Check out the SEBA Digital Directory App!',
         url: window.location.href
       }).catch(console.error)
     } else {

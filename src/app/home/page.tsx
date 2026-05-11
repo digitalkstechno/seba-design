@@ -12,6 +12,7 @@ import FooterSponsors from "@/components/FooterSponsors";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import Footer from "@/components/Footer";
+import Image from "next/image";
 
 const HomeContent = () => {
   const router = useRouter();
@@ -22,22 +23,22 @@ const HomeContent = () => {
   const menu = [
     {
       label: "Associated",
-      img: "https://cdn-icons-png.flaticon.com/512/1055/1055644.png",
+      img: "/images/Associated.png",
       path: "/accociated",
     },
     {
       label: "Members",
-      img: "https://cdn-icons-png.flaticon.com/512/33/33308.png",
+      img: "/images/member.png",
       path: "/member",
     },
     {
       label: "New Member",
-      img: "https://cdn-icons-png.flaticon.com/512/1250/1250592.png",
+      img: "/images/new_member.png",
       path: "/newMember",
     },
     {
       label: "Search",
-      icon: <FiSearch className="text-red-600 text-lg" />,
+      img: "/images/search.png",
       path: "/search",
     },
   ];
@@ -53,7 +54,7 @@ const HomeContent = () => {
         console.error("Failed to increment view count", err);
       }
     };
-    
+
     const fetchSponsors = async () => {
       try {
         const { data } = await api.get("/seba/sponsor");
@@ -95,28 +96,28 @@ const HomeContent = () => {
     <>
       <div className="h-screen bg-[#d9d9d9] flex flex-col items-center">
         <div className="w-[420px] min-h-screen bg-[#f8f9fa] relative px-5 pt-6 shadow-2xl overflow-hidden border border-gray-200 flex flex-col">
-          
+
           {/* Restriction Modal */}
           {showRestriction && (
             <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] z-[100] flex items-center justify-center p-6">
               <div className="bg-white rounded-3xl p-8 shadow-2xl w-full max-w-[320px] animate-in zoom-in-95 duration-300 flex flex-col items-center text-center">
                 <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mb-4">
-                   <div className="w-8 h-8 rounded-full border-4 border-red-500 border-t-transparent animate-spin-slow" />
-                   <span className="absolute text-red-500 font-bold text-2xl">!</span>
+                  <div className="w-8 h-8 rounded-full border-4 border-red-500 border-t-transparent animate-spin-slow" />
+                  <span className="absolute text-red-500 font-bold text-2xl">!</span>
                 </div>
                 <h3 className="text-xl font-extrabold text-gray-900 mb-2">Access Restricted</h3>
                 <p className="text-gray-500 text-sm leading-relaxed mb-6">
                   To view our digital directory, you must first <span className="font-bold text-gray-800">Become a SEBA Member</span>.
                 </p>
-                
+
                 <div className="flex flex-col gap-3 w-full">
-                  <button 
+                  <button
                     onClick={() => router.push("/newMember")}
                     className="w-full bg-[#0b4b4b] text-white py-3.5 rounded-xl font-bold text-sm shadow-lg active:scale-95 transition-all"
                   >
                     Register Now
                   </button>
-                  <button 
+                  <button
                     onClick={() => setShowRestriction(false)}
                     className="w-full bg-gray-100 text-gray-600 py-3.5 rounded-xl font-bold text-sm hover:bg-gray-200 active:scale-95 transition-all"
                   >
@@ -134,25 +135,38 @@ const HomeContent = () => {
                 Welcome to <span className="font-bold">SEBA</span> digital directory
               </p>
               {/* View Counter */}
-              <div className="flex items-center gap-2 mt-1">
-                <FaEye className="text-[#3b5998] text-[20px]" />
-                <span className="text-[28px] font-mono font-medium text-gray-900 tracking-[1px]">
-                  {viewCount}
-                </span>
+              <div className="flex items-center mt-3 w-fit">
+                <div className="mr-2">
+                  <Image
+                    src="/images/eyes.png"
+                    alt="Eye"
+                    width={25}
+                    height={25}
+                    className="object-contain"
+                  />
+                </div>
+                <div className="flex space-x-[8px] ml-1">
+                  {viewCount
+                    .split("")
+                    .map((n, i) => (
+                      <div
+                        key={i}
+                        className="flex items-center justify-center font-['Digital7'] text-[30px] text-gray-800"
+                      >
+                        {n}
+                      </div>
+                    ))}
+                </div>
               </div>
             </div>
 
             {/* Profile */}
             <div className="absolute right-4 top-4">
-              <div className="p-[3px] rounded-full bg-yellow-300 shadow-[0_0_15px_#facc15]">
-                <div className="w-14 h-14 rounded-full overflow-hidden bg-white">
-                  <img
-                    src="/images/user-profile.jpg"
-                    className="w-full h-full object-cover"
-                    alt="profile"
-                  />
-                </div>
-              </div>
+              <img
+                src="/images/auth_page_1.png"
+                className="w-full h-full object-cover"
+                alt="profile"
+              />
             </div>
           </div>
 
@@ -193,16 +207,14 @@ const HomeContent = () => {
                 onClick={() => handleMenuClick(item)}
                 className="flex flex-col items-center cursor-pointer group"
               >
-                <div className="bg-gray-200/60 rounded-xl w-[70px] h-[65px] flex justify-center items-center shadow-md border border-gray-100 group-hover:bg-gray-300 transition-all active:scale-95">
-                   {item.img ? (
-                     <img
-                       src={item.img}
-                       alt={item.label}
-                       className="h-7 w-7 object-contain"
-                     />
-                   ) : (
-                     item.icon
-                   )}
+                <div className="bg-white rounded-xl w-[70px] h-[70px] flex justify-center items-center shadow-md border border-gray-200 group-hover:bg-gray-50 transition-all overflow-hidden relative">
+                  <Image
+                    src={item.img}
+                    alt={item.label}
+                    width={150}
+                    height={150}
+                    className="object-contain max-w-none scale-[2.1]"
+                  />
                 </div>
 
                 <p className="text-[12px] mt-2 italic font-bold text-gray-700">

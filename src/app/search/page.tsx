@@ -91,7 +91,7 @@ const Search = () => {
                         <div className="p-[3px] rounded-full bg-yellow-300 shadow-[0_0_15px_#facc15]">
                             <div className="w-14 h-14 rounded-full overflow-hidden bg-white">
                                 <img
-                                    src="/images/user-profile.jpg"
+                                    src="/images/auth_page_1.png"
                                     className="w-full h-full object-cover"
                                     alt="profile"
                                 />
@@ -238,4 +238,4 @@ const Search = () => {
     )
 }
 
-export default Search;
+export default Search;

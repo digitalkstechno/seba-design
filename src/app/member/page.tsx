@@ -88,7 +88,7 @@ const MemberContent: FC = () => {
             <div className="p-[3px] rounded-full bg-yellow-300 shadow-[0_0_15px_#facc15]">
               <div className="w-14 h-14 rounded-full overflow-hidden bg-white">
                 <img
-                  src="/images/user-profile.jpg"
+                  src="/images/auth_page_1.png"
                   alt="profile"
                   className="w-full h-full object-cover"
                 />
@@ -119,11 +119,13 @@ const MemberContent: FC = () => {
 
                 {/* Image + ID */}
                 <div className="w-[70px] text-center text-[11px]">
-                  <img
-                    src={member.image}
-                    alt={member.name}
-                    className="w-[60px] h-[70px] object-cover mx-auto"
-                  />
+                  <div className="w-[60px] h-[70px] bg-gray-50 flex items-center justify-center mx-auto overflow-hidden">
+                    <img
+                      src={member.image}
+                      alt={member.name}
+                      className="max-w-full max-h-full object-contain"
+                    />
+                  </div>
                   <p className="mt-1 font-medium">{member.id}</p>
                 </div>
 

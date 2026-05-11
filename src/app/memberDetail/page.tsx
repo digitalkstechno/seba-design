@@ -55,8 +55,8 @@ const MemberDetailContent = () => {
 
                 {/* PROFILE */}
                 <div className="flex justify-center mt-2">
-                    <div className="w-[140px] h-[140px] rounded-full border-[8px] border-white shadow-xl overflow-hidden">
-                        <img src={profileImg} alt={member.name} className="w-full h-full object-cover" />
+                    <div className="w-[140px] h-[140px] rounded-full border-[8px] border-white shadow-xl overflow-hidden bg-white">
+                        <img src={profileImg} alt={member.name} className="w-full h-full object-contain" />
                     </div>
                 </div>
 

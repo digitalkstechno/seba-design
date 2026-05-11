@@ -22,7 +22,7 @@ const MEMBERS: Member[] = Array.from({ length: 6 }, () => ({
   name: "HIRENBHAI K. PATEL - Media Head",
   company: "M K GROUP",
   address: "B-86 Trikam Nagar Society, Near V-1 .....",
-  img: "/images/user-profile.jpg"
+  img: "/images/auth_page_1.png"
 }))
 
 // Components
