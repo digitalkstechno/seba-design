@@ -7,12 +7,14 @@ import { FiSearch } from "react-icons/fi";
 type Option = {
   id?: string;
   name: string;
+  isSub?: boolean;
+  parentCategory?: string;
 };
 
 type Props = {
   options: Option[];
   value: string;
-  onChange: (val: string) => void;
+  onChange: (val: string, opt?: Option) => void;
   placeholder?: string;
   className?: string;
   showOthers?: boolean;
@@ -90,14 +92,17 @@ const SearchableSelect = ({
                 <div
                   key={idx}
                   onClick={() => {
-                    onChange(opt.name);
+                    onChange(opt.name, opt);
                     setIsOpen(false);
                     setSearchTerm("");
                   }}
-                  className="px-5 py-3 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 cursor-pointer transition-colors flex items-center justify-between group"
+                  className={`px-5 py-2.5 text-sm cursor-pointer transition-colors flex items-center justify-between group ${opt.isSub ? "pl-9 text-indigo-600 hover:bg-indigo-50/60 font-medium" : "text-gray-800 hover:bg-gray-50 font-bold border-t border-gray-50/50 first:border-t-0"}`}
                 >
-                  <span className="font-medium">{opt.name}</span>
-                  <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <span className="flex items-center gap-1.5 truncate">
+                    {opt.isSub && <span className="text-indigo-400 select-none">↳</span>}
+                    {opt.name}
+                  </span>
+                  <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
                 </div>
               ))
             ) : (

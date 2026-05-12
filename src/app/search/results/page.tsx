@@ -15,6 +15,8 @@ type Member = {
   id: string
   name: string
   company: string
+  category?: string
+  subCategory?: string
   address: string
   area?: string
   city?: string
@@ -29,6 +31,7 @@ const ResultsContent: FC = () => {
   const router = useRouter()
   const searchParams = useSearchParams()
   const urlCategory = searchParams.get('category') || ''
+  const urlSubCategory = searchParams.get('subCategory') || ''
   const urlArea = searchParams.get('area') || ''
 
   const [members, setMembers] = useState<Member[]>([])
@@ -39,6 +42,7 @@ const ResultsContent: FC = () => {
       try {
         let query = `/seba/member?`
         if (urlCategory) query += `category=${encodeURIComponent(urlCategory)}&`
+        if (urlSubCategory) query += `subCategory=${encodeURIComponent(urlSubCategory)}&`
         if (urlArea) query += `area=${encodeURIComponent(urlArea)}`
 
         const { data } = await api.get(query)
@@ -47,6 +51,8 @@ const ResultsContent: FC = () => {
             id: item.memberId,
             name: item.name,
             company: item.company,
+            category: item.category,
+            subCategory: item.subCategory,
             address: item.address,
             area: item.area,
             city: item.city,
@@ -83,8 +89,10 @@ const ResultsContent: FC = () => {
           >
             <IoIosArrowBack className="text-xl text-gray-700" />
           </div>
-          <p className="text-[16px] font-black text-[#0b4b4b] uppercase tracking-tight ml-2">
-            {(urlCategory && urlCategory !== 'All Categories') ? urlCategory.toUpperCase() : "SEBA MEMBERS"}
+          <p className="text-[14px] font-black text-[#0b4b4b] uppercase tracking-tight ml-2 truncate">
+            {urlCategory && urlCategory !== 'All Categories' ? (
+              urlSubCategory ? `${urlCategory.toUpperCase()} - ${urlSubCategory.toUpperCase()}` : urlCategory.toUpperCase()
+            ) : "SEBA MEMBERS"}
           </p>
         </div>
 
@@ -122,6 +130,11 @@ const ResultsContent: FC = () => {
                       {member.company}
                     </p>
                   </div>
+                  {(member.category || member.subCategory) && (
+                    <p className="text-[10px] font-bold text-gray-700 truncate mt-[1px]">
+                      {[member.category, member.subCategory].filter(Boolean).join(' • ')}
+                    </p>
+                  )}
                   <p className="text-[10px] font-semibold truncate text-gray-500 mt-[2px] italic leading-tight">
                     {[member.address, member.area, member.city, member.state, member.pincode].filter(Boolean).join(', ')}
                   </p>

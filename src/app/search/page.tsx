@@ -19,8 +19,10 @@ const Search = () => {
     const [isOn, setIsOn] = useState(false);
     const [openDropdown, setOpenDropdown] = useState<string | null>(null);
     const [category, setCategory] = useState("All Categories");
+    const [subCategory, setSubCategory] = useState("");
     const [area, setArea] = useState("");
     const [categories, setCategories] = useState<any[]>([]);
+    const [subCategories, setSubCategories] = useState<any[]>([]);
     const [areas, setAreas] = useState<string[]>([]);
     const [sponsors, setSponsors] = useState<any[]>([]);
 
@@ -60,12 +62,21 @@ const Search = () => {
         const newIsOn = !isOn;
         setIsOn(newIsOn);
         if (newIsOn) {
-            let query = '';
+            const params = new URLSearchParams();
             const isAllCategories = category === "All Categories" || !category;
             
-            if (!isAllCategories && area) query = `?category=${category}&area=${area}`;
-            else if (!isAllCategories) query = `?category=${category}`;
-            else if (area) query = `?area=${area}`;
+            if (!isAllCategories) {
+                params.append('category', category);
+                if (subCategory && subCategory !== "All Sub Categories") {
+                    params.append('subCategory', subCategory);
+                }
+            }
+            if (area) {
+                params.append('area', area);
+            }
+            
+            const queryString = params.toString();
+            const query = queryString ? `?${queryString}` : '';
             
             setTimeout(() => {
                 router.push(`/search/results${query}`);
@@ -74,6 +85,16 @@ const Search = () => {
     };
 
     const coSponsor = sponsors.find(s => s.type === 'co-sponsor');
+
+    const combinedOptions: any[] = [{ name: "All Categories" }];
+    categories.forEach(cat => {
+        combinedOptions.push({ name: cat.name });
+        if (Array.isArray(cat.subCategories)) {
+            cat.subCategories.forEach((sub: string) => {
+                combinedOptions.push({ name: sub, isSub: true, parentCategory: cat.name });
+            });
+        }
+    });
 
     return (
         <div className="h-screen bg-[#d9d9d9] flex justify-center items-start">
@@ -129,10 +150,21 @@ const Search = () => {
                 {/* Dropdowns */}
                     <div className="flex flex-col gap-5 px-1">
                         <SearchableSelect 
-                            options={[{name: "All Categories"}, ...categories]}
-                            value={category}
-                            onChange={(val) => setCategory(val)}
-                            placeholder="Category"
+                            options={combinedOptions}
+                            value={subCategory || category}
+                            onChange={(val, opt) => {
+                                if (val === "All Categories") {
+                                    setCategory("All Categories");
+                                    setSubCategory("");
+                                } else if (opt?.isSub) {
+                                    setCategory(opt.parentCategory || "");
+                                    setSubCategory(opt.name);
+                                } else {
+                                    setCategory(val);
+                                    setSubCategory("");
+                                }
+                            }}
+                            placeholder="Category / Sub Category"
                             showOthers={false}
                             triggerStyle={{
                                 background: "#f7f7f7",

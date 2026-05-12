@@ -69,6 +69,9 @@ const NewMember: FC = () => {
   // Categories
   const [categories, setCategories] = useState<any[]>([])
   const [categorySelection, setCategorySelection] = useState("")
+  const [subCategorySelection, setSubCategorySelection] = useState("")
+  const [subCategories, setSubCategories] = useState<any[]>([])
+  const [otherSubCategory, setOtherSubCategory] = useState("")
   const [showOtherCategory, setShowOtherCategory] = useState(false)
   const [areaValue, setAreaValue] = useState("")
   const [pincode, setPincode] = useState("")
@@ -197,6 +200,7 @@ const NewMember: FC = () => {
       { label: "COMPANY NAME", value: formData.get('company'), icon: "🏢" },
       { label: "DESIGNATION", value: formData.get('position'), icon: "💼" },
       { label: "BUSINESS CATEGORY", value: showOtherCategory ? formData.get('otherCategory') : categorySelection, icon: "🏢" },
+      { label: "SUB CATEGORY", value: subCategorySelection === 'Others' ? otherSubCategory : subCategorySelection, icon: "↳" },
       { label: "PRIMARY MOBILE", value: formatPhoneNumber(formData.get('mobile') as string), icon: "📱" },
       { label: "OFFICE NUMBER", value: formData.get('officeNo') ? formatPhoneNumber(formData.get('officeNo') as string) : "", icon: "📞" },
       { label: "OPERATIONAL AREA", value: formData.get('area'), icon: "📍" },
@@ -293,6 +297,9 @@ const NewMember: FC = () => {
         formData.set('category', categorySelection)
       }
 
+      const finalSubCategory = subCategorySelection === 'Others' ? otherSubCategory : subCategorySelection;
+      formData.set('subCategory', finalSubCategory);
+
       // Ensure area is set from our state
       formData.set('area', areaValue)
       formData.set('pincode', pincode)
@@ -387,6 +394,10 @@ const NewMember: FC = () => {
                   onChange={(val) => {
                     setCategorySelection(val)
                     setShowOtherCategory(val === 'Others')
+                    setSubCategorySelection("")
+                    const matchedCat = categories.find(c => c.name === val)
+                    const subs = matchedCat?.subCategories || []
+                    setSubCategories(subs.map((s: string) => ({ name: s })))
                   }}
                   placeholder="Select Category :"
                   triggerStyle={{
@@ -405,6 +416,38 @@ const NewMember: FC = () => {
                   required 
                   className="h-9 px-3 rounded bg-white outline-none border-l-4 border-red-500" 
                   placeholder="Enter Category Name :" 
+                />
+              )}
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <div className="border-l-4 border-[#0b4b4b] rounded">
+                <SearchableSelect 
+                  options={subCategories}
+                  value={subCategorySelection}
+                  onChange={(val) => {
+                    setSubCategorySelection(val)
+                  }}
+                  placeholder="Select Sub Category :"
+                  showOthers={true}
+                  triggerStyle={{
+                    borderRadius: '0 0.25rem 0.25rem 0', 
+                    height: '2.25rem',
+                    backgroundColor: 'white',
+                    border: 'none',
+                    paddingLeft: '0.75rem',
+                    paddingRight: '0.75rem'
+                  }}
+                />
+              </div>
+              {subCategorySelection === 'Others' && (
+                <input 
+                  name="otherSubCategory" 
+                  required 
+                  className="h-9 px-3 rounded bg-white outline-none border-l-4 border-red-500" 
+                  placeholder="Enter Sub Category Name :" 
+                  value={otherSubCategory}
+                  onChange={(e) => setOtherSubCategory(e.target.value)}
                 />
               )}
             </div>

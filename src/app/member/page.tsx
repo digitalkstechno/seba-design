@@ -14,6 +14,7 @@ type MemberType = {
   id: string
   name: string
   category: string
+  subCategory?: string
   company: string
   mobile: string
   address: string
@@ -26,6 +27,7 @@ const MemberContent: FC = () => {
   const router = useRouter()
   const searchParams = useSearchParams()
   const urlCategory = searchParams.get('category') || ''
+  const urlSubCategory = searchParams.get('subCategory') || ''
   const urlArea = searchParams.get('area') || ''
 
   const [members, setMembers] = useState<MemberType[]>([])
@@ -43,6 +45,7 @@ const MemberContent: FC = () => {
       try {
         let query = `/seba/member?search=${searchTerm}`
         if (urlCategory) query += `&category=${encodeURIComponent(urlCategory)}`
+        if (urlSubCategory) query += `&subCategory=${encodeURIComponent(urlSubCategory)}`
         if (urlArea) query += `&area=${encodeURIComponent(urlArea)}`
 
         const { data } = await api.get(query)
@@ -51,6 +54,7 @@ const MemberContent: FC = () => {
             id: item.memberId,
             name: item.position ? `${item.name} - ${item.position}` : item.name,
             category: item.category,
+            subCategory: item.subCategory,
             company: item.company,
             mobile: item.mobile,
             address: item.address,
@@ -130,14 +134,14 @@ const MemberContent: FC = () => {
                 </div>
 
                 {/* Details */}
-                <div className="flex-1 text-[12px] leading-5">
+                <div className="flex-1 text-[12px] leading-5 pr-1">
                   <p className="font-semibold text-[13px]">
                     {member.name}
                   </p>
-                  <p>{member.category}</p>
+                  <p className="text-gray-700 font-medium">{[member.category, member.subCategory].filter(Boolean).join(' • ')}</p>
                   <p className="font-semibold">{member.company}</p>
                   <p>{member.mobile}</p>
-                  <p>{member.address}</p>
+                  <p className="truncate">{member.address}</p>
                 </div>
 
               </div>
@@ -154,6 +158,10 @@ const MemberContent: FC = () => {
         <Footer />
 
       </div>
+      
+      <style jsx>{`
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+      `}</style>
     </div>
   )
 }
