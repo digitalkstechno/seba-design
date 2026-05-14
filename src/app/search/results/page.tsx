@@ -37,6 +37,44 @@ const ResultsContent: FC = () => {
   const [members, setMembers] = useState<Member[]>([])
   const [loading, setLoading] = useState(true)
 
+  const [refreshTrigger, setRefreshTrigger] = useState(0)
+
+  // Handle bfcache restore and back navigation data fetch seamlessly
+  useEffect(() => {
+    const checkAndFetch = () => {
+      try {
+        if (typeof window !== 'undefined' && localStorage.getItem('seba:navigatedToCard') === 'true') {
+          localStorage.removeItem('seba:navigatedToCard');
+          setRefreshTrigger(prev => prev + 1);
+        }
+      } catch (e) {}
+    };
+
+    checkAndFetch();
+
+    const handlePageShow = (e: PageTransitionEvent) => {
+      if (e.persisted) {
+        setRefreshTrigger(prev => prev + 1);
+      } else {
+        checkAndFetch();
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        checkAndFetch();
+      }
+    };
+
+    window.addEventListener('pageshow', handlePageShow);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener('pageshow', handlePageShow);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, []);
+
   useEffect(() => {
     const fetchMembers = async () => {
       try {
@@ -75,7 +113,7 @@ const ResultsContent: FC = () => {
       }
     }
     fetchMembers()
-  }, [urlCategory, urlArea])
+  }, [urlCategory, urlArea, refreshTrigger])
 
   return (
     <div className="h-screen bg-[#d9d9d9] flex justify-center">
@@ -145,7 +183,10 @@ const ResultsContent: FC = () => {
                   <div 
                     onClick={() => {
                       if (member.cardId) {
-                        window.location.href = `${process.env.NEXT_PUBLIC_CARD_URL}/${member.cardId}`;
+                        try {
+                          localStorage.setItem('seba:navigatedToCard', 'true');
+                        } catch (e) {}
+                        window.location.href = `${process.env.NEXT_PUBLIC_CARD_URL}/${member.cardId}?view=home`;
                       } else {
                         router.push(`/memberDetail?id=${member.id}`);
                       }
