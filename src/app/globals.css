@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,700;1,400;1,700&display=swap');
 @import "tailwindcss";
 
 @font-face {
@@ -5,6 +6,10 @@
   src: url('/digital-7.regular.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
+}
+
+.font-lora {
+  font-family: 'Lora', Georgia, Cambria, 'Times New Roman', Times, serif;
 }
 
 :root {
@@ -17,6 +22,8 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-lora: 'Lora', Georgia, Cambria, 'Times New Roman', Times, serif;
+  --font-georgia: Georgia, Cambria, "Times New Roman", Times, serif;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -30,4 +37,15 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: "Inter", system-ui, -apple-system, sans-serif;
+}
+
+/* Hide scrollbar globally for Chrome, Safari and Opera */
+*::-webkit-scrollbar {
+  display: none !important;
+}
+
+/* Hide scrollbar globally for IE, Edge and Firefox */
+* {
+  -ms-overflow-style: none !important;  /* IE and Edge */
+  scrollbar-width: none !important;  /* Firefox */
 }

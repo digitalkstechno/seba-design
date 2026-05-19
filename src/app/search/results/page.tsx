@@ -17,6 +17,7 @@ type Member = {
   company: string
   category?: string
   subCategory?: string
+  natureOfBusiness?: string
   address: string
   area?: string
   city?: string
@@ -91,6 +92,7 @@ const ResultsContent: FC = () => {
             company: item.company,
             category: item.category,
             subCategory: item.subCategory,
+            natureOfBusiness: item.natureOfBusiness,
             address: item.address,
             area: item.area,
             city: item.city,
@@ -168,11 +170,6 @@ const ResultsContent: FC = () => {
                       {member.company}
                     </p>
                   </div>
-                  {(member.category || member.subCategory) && (
-                    <p className="text-[10px] font-bold text-gray-700 truncate mt-[1px]">
-                      {[member.category, member.subCategory].filter(Boolean).join(' • ')}
-                    </p>
-                  )}
                   <p className="text-[10px] font-semibold truncate text-gray-500 mt-[2px] italic leading-tight">
                     {[member.address, member.area, member.city, member.state, member.pincode].filter(Boolean).join(', ')}
                   </p>

@@ -2,6 +2,7 @@
 
 import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { getCookie } from "@/lib/cookies";
 
 const publicPaths = ["/auth"];
 
@@ -13,8 +14,8 @@ export default function RouteGuard({ children }: { children: React.ReactNode }) 
   useEffect(() => {
     // Check if user is authenticated
     const authCheck = () => {
-      const name = sessionStorage.getItem("seba_user_name");
-      const mobile = sessionStorage.getItem("seba_user_mobile");
+      const name = getCookie("seba_user_name");
+      const mobile = getCookie("seba_user_mobile");
 
       if (!name || !mobile) {
         if (!publicPaths.includes(pathname)) {

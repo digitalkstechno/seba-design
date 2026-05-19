@@ -2,10 +2,6 @@
 
 import { FC } from "react"
 import { useRouter } from "next/navigation"
-import { AiOutlineHome } from "react-icons/ai"
-import { BsGlobe, BsShare } from "react-icons/bs"
-import { LuLayoutDashboard } from "react-icons/lu"
-
 import { useAlert } from "@/context/AlertContext"
 
 const Footer: FC = () => {
@@ -26,42 +22,42 @@ const Footer: FC = () => {
   }
 
   return (
-    <div className="bg-[#003d3d] -mx-5 px-6 py-3 flex justify-between items-center text-white fixed bottom-0 w-[420px] z-50">
-      <div 
-        onClick={() => router.push('/home')} 
+    <div className="bg-[#003d3d] px-6 py-2.5 flex justify-between items-center text-white fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-[420px] z-50 border-t border-white/10 shadow-lg">
+      <div
+        onClick={() => router.push('/home')}
         className="flex flex-col items-center cursor-pointer opacity-90 hover:opacity-100 transition-opacity"
       >
-        <AiOutlineHome className="text-xl" />
-        <span className="text-[10px] mt-1 font-bold uppercase">home</span>
+        <img src="/images/home icon.png" alt="home" className="w-[28px] h-[28px] object-contain" />
+        <span className="text-[12px] mt-1 font-medium tracking-wide">home</span>
       </div>
 
       <div className="flex flex-col items-center cursor-pointer opacity-90 hover:opacity-100 transition-opacity">
-        <img src="/images/seba-link1.png" alt="app" className="w-8 h-8 object-contain" />
-        <span className="text-[10px] -mt-1 font-bold uppercase">app link</span>
+        <img src="/images/seba-link.png" alt="app link" className="w-[36px] h-[36px] object-contain my-[-4px]" />
+        <span className="text-[12px] mt-1 font-medium tracking-wide">app link</span>
       </div>
 
-      <div 
+      <div
         onClick={() => window.open('http://www.seba.org', '_blank')}
         className="flex flex-col items-center cursor-pointer opacity-90 hover:opacity-100 transition-opacity"
       >
-        <BsGlobe className="text-xl" />
-        <span className="text-[10px] mt-1 font-bold uppercase">www.seba</span>
+        <img src="/images/wolrd.png" alt="www.seba" className="w-[40px] h-[40px] object-contain my-[-6px]" />
+        <span className="text-[12px] mt-1 font-medium tracking-wide">www.seba</span>
       </div>
 
-      <div 
+      <div
         onClick={() => router.push('/buildersDeveloper')}
         className="flex flex-col items-center cursor-pointer opacity-90 hover:opacity-100 transition-opacity"
       >
-        <LuLayoutDashboard className="text-xl" />
-        <span className="text-[10px] mt-1 font-bold uppercase">dropbox</span>
+        <img src="/images/dropbox.png" alt="dropbox" className="w-[28px] h-[28px] object-contain" />
+        <span className="text-[12px] mt-1 font-medium tracking-wide">dropbox</span>
       </div>
 
       <button
         onClick={handleShare}
-        className="flex flex-col items-center cursor-pointer opacity-90 hover:opacity-100 transition-opacity"
+        className="flex flex-col items-center cursor-pointer opacity-90 hover:opacity-100 transition-opacity bg-transparent border-none text-white p-0"
       >
-        <BsShare className="text-lg" />
-        <span className="text-[10px] mt-1 font-bold uppercase">share</span>
+        <img src="/images/share.png" alt="share" className="w-[28px] h-[28px] object-contain" />
+        <span className="text-[12px] mt-1 font-medium tracking-wide">share</span>
       </button>
     </div>
   )

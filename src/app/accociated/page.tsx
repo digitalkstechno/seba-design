@@ -69,21 +69,17 @@ const Associated: FC = () => {
               className="text-xl cursor-pointer"
             />
             <p className="text-[14px] italic">
-              Welcome to <span className="font-semibold">SEBA</span> Members List
+              Welcome to Association Zone
             </p>
           </div>
 
           {/* Profile */}
-          <div className="absolute right-4 top-4">
-            <div className="p-[3px] rounded-full bg-yellow-300 shadow-[0_0_15px_#facc15]">
-              <div className="w-14 h-14 rounded-full overflow-hidden bg-white">
-                <img
-                  src="/images/auth_page_1.png"
-                  alt="profile"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            </div>
+          <div className="absolute right-[-14px] top-[-14px] z-20">
+            <img
+              src="/images/Associated_profile.png"
+              alt="profile"
+              className="w-[110px] h-[110px] object-contain"
+            />
           </div>
         </div>
 

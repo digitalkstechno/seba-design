@@ -8,6 +8,7 @@ import { BsGlobe, BsShare } from "react-icons/bs"
 import { IoIosArrowBack } from "react-icons/io"
 import { FaSearch } from "react-icons/fa"
 import Footer from "@/components/Footer"
+import { getCookie } from "@/lib/cookies"
 
 // Types
 type MemberType = {
@@ -15,6 +16,7 @@ type MemberType = {
   name: string
   category: string
   subCategory?: string
+  natureOfBusiness?: string
   company: string
   mobile: string
   address: string
@@ -34,7 +36,7 @@ const MemberContent: FC = () => {
   const [searchTerm, setSearchTerm] = useState("")
 
   useEffect(() => {
-    const token = sessionStorage.getItem("seba_token");
+    const token = getCookie("seba_token");
     if (!token) {
       router.push("/home?restricted=true");
     }
@@ -55,6 +57,7 @@ const MemberContent: FC = () => {
             name: item.position ? `${item.name} - ${item.position}` : item.name,
             category: item.category,
             subCategory: item.subCategory,
+            natureOfBusiness: item.natureOfBusiness,
             company: item.company,
             mobile: item.mobile,
             address: item.address,
@@ -88,16 +91,12 @@ const MemberContent: FC = () => {
           </div>
 
           {/* Profile */}
-          <div className="absolute right-4 top-4">
-            <div className="p-[3px] rounded-full bg-yellow-300 shadow-[0_0_15px_#facc15]">
-              <div className="w-14 h-14 rounded-full overflow-hidden bg-white">
-                <img
-                  src="/images/auth_page_1.png"
-                  alt="profile"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            </div>
+          <div className="absolute right-[-14px] top-[-14px] z-20">
+            <img
+              src="/images/member_profile.png"
+              alt="profile"
+              className="w-[110px] h-[110px] object-contain"
+            />
           </div>
         </div>
 
@@ -138,7 +137,6 @@ const MemberContent: FC = () => {
                   <p className="font-semibold text-[13px]">
                     {member.name}
                   </p>
-                  <p className="text-gray-700 font-medium">{[member.category, member.subCategory].filter(Boolean).join(' • ')}</p>
                   <p className="font-semibold">{member.company}</p>
                   <p>{member.mobile}</p>
                   <p className="truncate">{member.address}</p>

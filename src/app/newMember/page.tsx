@@ -1,6 +1,6 @@
 'use client'
 
-import { FC, useState, FormEvent, useEffect, useRef } from "react"
+import { FC, useState, FormEvent, useRef } from "react"
 import { useRouter } from "next/navigation"
 import api from "@/lib/axios"
 import { formatPhoneNumber, cleanPhoneNumber } from "@/lib/phoneUtils"
@@ -11,10 +11,10 @@ import { AiOutlineHome } from "react-icons/ai"
 import { LuLayoutDashboard } from "react-icons/lu"
 import { IoIosArrowBack } from "react-icons/io"
 import { jsPDF } from "jspdf"
-import SearchableSelect from "@/components/SearchableSelect"
 import Cropper, { Area } from 'react-easy-crop'
 import Footer from "@/components/Footer"
 import { useAlert } from "@/context/AlertContext"
+import { setCookie } from "@/lib/cookies"
 
 const getCroppedImg = (
   imageSrc: string,
@@ -66,33 +66,8 @@ const NewMember: FC = () => {
   const [zoom, setZoom] = useState(1)
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null)
 
-  // Categories
-  const [categories, setCategories] = useState<any[]>([])
-  const [categorySelection, setCategorySelection] = useState("")
-  const [subCategorySelection, setSubCategorySelection] = useState("")
-  const [subCategories, setSubCategories] = useState<any[]>([])
-  const [otherSubCategory, setOtherSubCategory] = useState("")
-  const [showOtherCategory, setShowOtherCategory] = useState(false)
-  const [areaValue, setAreaValue] = useState("")
-  const [pincode, setPincode] = useState("")
-  const [city, setCity] = useState("Surat")
-  const [state, setState] = useState("Gujarat")
   const [mobile, setMobile] = useState(formatPhoneNumber(""))
   const [officeNo, setOfficeNo] = useState(formatPhoneNumber(""))
-
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const { data } = await api.get("/seba/category")
-        if (data.status === "Success") {
-          setCategories(data.data)
-        }
-      } catch (err) {
-        console.error("Failed to fetch categories", err)
-      }
-    }
-    fetchCategories()
-  }, [])
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -130,7 +105,7 @@ const NewMember: FC = () => {
   const handleDownloadPDF = async () => {
     if (!formRef.current) return
     const formData = new FormData(formRef.current)
-    
+
     const doc = new jsPDF()
     const pageWidth = doc.internal.pageSize.getWidth()
     const pageHeight = doc.internal.pageSize.getHeight()
@@ -160,7 +135,7 @@ const NewMember: FC = () => {
     // 1. Decorative Background Elements
     doc.setFillColor(11, 75, 75) // Theme Color #0b4b4b
     doc.rect(0, 0, 15, pageHeight, 'F') // Vertical Sidebar
-    
+
     // 2. Header Section with Logo
     try {
       const logoData = await getImageData("/images/logo.png");
@@ -177,12 +152,12 @@ const NewMember: FC = () => {
     doc.setFontSize(22)
     doc.setTextColor(11, 75, 75)
     doc.text("SEBA", 45, 27)
-    
+
     doc.setFontSize(9)
     doc.setTextColor(100, 100, 100)
     doc.setFont("helvetica", "italic")
     doc.text("Surat East Builder Association", 45, 33)
-    
+
     doc.setDrawColor(11, 75, 75)
     doc.setLineWidth(0.5)
     doc.line(20, 40, 190, 40)
@@ -194,20 +169,14 @@ const NewMember: FC = () => {
     doc.text("MEMBERSHIP APPLICATION FORM", 25, 52)
 
 
-    // 5. Member Details Section
     const fields = [
       { label: "FULL NAME", value: formData.get('name'), icon: "👤" },
       { label: "COMPANY NAME", value: formData.get('company'), icon: "🏢" },
       { label: "DESIGNATION", value: formData.get('position'), icon: "💼" },
-      { label: "BUSINESS CATEGORY", value: showOtherCategory ? formData.get('otherCategory') : categorySelection, icon: "🏢" },
-      { label: "SUB CATEGORY", value: subCategorySelection === 'Others' ? otherSubCategory : subCategorySelection, icon: "↳" },
-      { label: "PRIMARY MOBILE", value: formatPhoneNumber(formData.get('mobile') as string), icon: "📱" },
-      { label: "OFFICE NUMBER", value: formData.get('officeNo') ? formatPhoneNumber(formData.get('officeNo') as string) : "", icon: "📞" },
-      { label: "OPERATIONAL AREA", value: formData.get('area'), icon: "📍" },
+      { label: "NATURE OF BUSINESS", value: formData.get('natureOfBusiness'), icon: "🏢" },
+      { label: "PERSONAL NO.", value: formatPhoneNumber(formData.get('mobile') as string), icon: "📱" },
+      { label: "OFFICE NO.", value: formData.get('officeNo') ? formatPhoneNumber(formData.get('officeNo') as string) : "", icon: "📞" },
       { label: "OFFICE ADDRESS", value: formData.get('address'), icon: "🏠" },
-      { label: "PINCODE", value: formData.get('pincode'), icon: "🔢" },
-      { label: "CITY", value: formData.get('city'), icon: "🏙️" },
-      { label: "STATE", value: formData.get('state'), icon: "🗺️" },
       { label: "EMAIL / WEBSITE", value: formData.get('emailWebsite'), icon: "🌐" },
     ]
 
@@ -216,7 +185,7 @@ const NewMember: FC = () => {
       const rawVal = field.value?.toString().trim()
       const val = rawVal && rawVal !== "" ? rawVal : ""
       const splitText = doc.splitTextToSize(val, index < 6 ? 110 : 160) // Wider if below photo
-      
+
       // Calculate dynamic height for this row
       const rowHeight = (splitText.length * 5) + 8
 
@@ -231,13 +200,13 @@ const NewMember: FC = () => {
       doc.setFontSize(8.5)
       doc.setTextColor(11, 75, 75)
       doc.text(field.label, 25, y)
-      
+
       // Value
       doc.setFont("helvetica", "normal")
       doc.setFontSize(10)
       doc.setTextColor(40, 40, 40)
       doc.text(splitText, 25, y + 5)
-      
+
       y += rowHeight + 2 // Extra gap between rows
     })
 
@@ -247,7 +216,7 @@ const NewMember: FC = () => {
         // Shadow effect for photo
         doc.setFillColor(230, 230, 230)
         doc.rect(152, 47, 40, 50, 'F')
-        
+
         doc.addImage(imagePreview, 'JPEG', 150, 45, 40, 50)
         doc.setDrawColor(11, 75, 75)
         doc.setLineWidth(0.8)
@@ -260,12 +229,12 @@ const NewMember: FC = () => {
     // 6. Footer Section
     doc.setFillColor(11, 75, 75)
     doc.rect(0, pageHeight - 20, pageWidth, 20, 'F')
-    
+
     doc.setFont("helvetica", "bold")
     doc.setFontSize(10)
     doc.setTextColor(255, 255, 255)
     doc.text("CONFIDENTIAL DOCUMENT", pageWidth / 2, pageHeight - 12, { align: 'center' })
-    
+
     doc.setFontSize(8)
     doc.setFont("helvetica", "normal")
     doc.text("This form is generated electronically via SEBA Digital Portal", pageWidth / 2, pageHeight - 7, { align: 'center' })
@@ -283,28 +252,12 @@ const NewMember: FC = () => {
         formData.set('image', croppedFile)
       }
 
-      // Handle category
-      if (showOtherCategory) {
-        const otherCat = formData.get('otherCategory') as string
-        if (otherCat) {
-          // Add to database first
-          try {
-            await api.post('/seba/category', { name: otherCat })
-          } catch (e) {}
-          formData.set('category', otherCat)
-        }
-      } else {
-        formData.set('category', categorySelection)
-      }
-
-      const finalSubCategory = subCategorySelection === 'Others' ? otherSubCategory : subCategorySelection;
-      formData.set('subCategory', finalSubCategory);
-
-      // Ensure area is set from our state
-      formData.set('area', areaValue)
-      formData.set('pincode', pincode)
-      formData.set('city', city)
-      formData.set('state', state)
+      formData.set('category', '')
+      formData.set('subCategory', '')
+      formData.set('area', '')
+      formData.set('pincode', '')
+      formData.set('city', '')
+      formData.set('state', '')
 
       const cleanedMobile = cleanPhoneNumber(mobile)
       const cleanedOfficeNo = cleanPhoneNumber(officeNo)
@@ -316,7 +269,7 @@ const NewMember: FC = () => {
         headers: { 'Content-Type': 'multipart/form-data' }
       })
       if (data.status === 'Success') {
-        sessionStorage.setItem("seba_registered", "true")
+        setCookie("seba_registered", "true")
         showAlert("Member application submitted successfully!")
         router.push("/home")
       }
@@ -332,6 +285,15 @@ const NewMember: FC = () => {
 
       <div className="w-[420px] h-full bg-[#eeeeee] relative px-5 pt-5 shadow-md flex flex-col">
 
+        {/* Profile */}
+        <div className="absolute right-[-14px] top-[-14px] z-20">
+          <img
+            src="/images/new_member_profile.png"
+            className="w-[110px] h-[110px] object-contain"
+            alt="profile"
+          />
+        </div>
+
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
@@ -340,7 +302,7 @@ const NewMember: FC = () => {
               className="text-xl cursor-pointer"
             />
             <p className="text-[14px] italic">
-              Welcome to <span className="font-semibold">SEBA</span> Members List
+              Welcome to New Member
             </p>
           </div>
         </div>
@@ -356,7 +318,7 @@ const NewMember: FC = () => {
           </p>
         </div>
 
-        <form ref={formRef} onSubmit={handleSubmit} className="flex-1 flex flex-col overflow-y-auto pb-32">
+        <form ref={formRef} onSubmit={handleSubmit} className="flex-1 flex flex-col overflow-y-auto pb-32 no-scrollbar">
           {/* Upload Box */}
           <div className="absolute right-4 top-[90px] w-[120px] h-[130px] border-2 border-blue-400 rounded-lg bg-white shadow-sm flex flex-col items-center justify-center text-center text-[12px] overflow-hidden">
             {imagePreview ? (
@@ -385,121 +347,23 @@ const NewMember: FC = () => {
             <input name="name" required className="h-9 px-3 rounded bg-white outline-none border-l-4 border-[#0b4b4b]" placeholder="Full Name :" />
             <input name="company" required className="h-9 px-3 rounded bg-white outline-none font-bold border-l-4 border-[#0b4b4b]" placeholder="Company Name :" />
             <input name="position" className="h-9 px-3 rounded bg-white outline-none border-l-4 border-[#0b4b4b]" placeholder="Position :" />
-            
-            <div className="flex flex-col gap-1">
-              <div className="border-l-4 border-[#0b4b4b] rounded">
-                <SearchableSelect 
-                  options={categories}
-                  value={categorySelection}
-                  onChange={(val) => {
-                    setCategorySelection(val)
-                    setShowOtherCategory(val === 'Others')
-                    setSubCategorySelection("")
-                    const matchedCat = categories.find(c => c.name === val)
-                    const subs = matchedCat?.subCategories || []
-                    setSubCategories(subs.map((s: string) => ({ name: s })))
-                  }}
-                  placeholder="Select Category :"
-                  triggerStyle={{
-                    borderRadius: '0 0.25rem 0.25rem 0', 
-                    height: '2.25rem',
-                    backgroundColor: 'white',
-                    border: 'none',
-                    paddingLeft: '0.75rem',
-                    paddingRight: '0.75rem'
-                  }}
-                />
-              </div>
-              {showOtherCategory && (
-                <input 
-                  name="otherCategory" 
-                  required 
-                  className="h-9 px-3 rounded bg-white outline-none border-l-4 border-red-500" 
-                  placeholder="Enter Category Name :" 
-                />
-              )}
-            </div>
+            <input name="natureOfBusiness" required className="h-9 px-3 rounded bg-white outline-none border-l-4 border-[#0b4b4b]" placeholder="Nature of Business :" />
 
-            <div className="flex flex-col gap-1">
-              <div className="border-l-4 border-[#0b4b4b] rounded">
-                <SearchableSelect 
-                  options={subCategories}
-                  value={subCategorySelection}
-                  onChange={(val) => {
-                    setSubCategorySelection(val)
-                  }}
-                  placeholder="Select Sub Category :"
-                  showOthers={true}
-                  triggerStyle={{
-                    borderRadius: '0 0.25rem 0.25rem 0', 
-                    height: '2.25rem',
-                    backgroundColor: 'white',
-                    border: 'none',
-                    paddingLeft: '0.75rem',
-                    paddingRight: '0.75rem'
-                  }}
-                />
-              </div>
-              {subCategorySelection === 'Others' && (
-                <input 
-                  name="otherSubCategory" 
-                  required 
-                  className="h-9 px-3 rounded bg-white outline-none border-l-4 border-red-500" 
-                  placeholder="Enter Sub Category Name :" 
-                  value={otherSubCategory}
-                  onChange={(e) => setOtherSubCategory(e.target.value)}
-                />
-              )}
-            </div>
-
-            <input 
-              name="mobile" 
-              required 
-              className="h-9 px-3 rounded bg-white outline-none border-l-4 border-[#0b4b4b]" 
-              placeholder="Contact No. :" 
+            <input
+              name="mobile"
+              required
+              className="h-9 px-3 rounded bg-white outline-none border-l-4 border-[#0b4b4b]"
+              placeholder="Personal No. :"
               value={mobile}
               onChange={(e) => setMobile(formatPhoneNumber(e.target.value))}
             />
-            
-            <input 
-              name="officeNo" 
-              className="h-9 px-3 rounded bg-white outline-none border-l-4 border-[#0b4b4b]" 
-              placeholder="Office / Shop No. :" 
+
+            <input
+              name="officeNo"
+              className="h-9 px-3 rounded bg-white outline-none border-l-4 border-[#0b4b4b]"
+              placeholder="Office No. :"
               value={officeNo}
               onChange={(e) => setOfficeNo(formatPhoneNumber(e.target.value))}
-            />
-
-            <input 
-              name="pincode" 
-              maxLength={6}
-              value={pincode}
-              onChange={(e) => {
-                const val = e.target.value.replace(/\D/g, '');
-                setPincode(val);
-                if (val.length === 6) {
-                  fetch(`https://api.postalpincode.in/pincode/${val}`)
-                    .then(res => res.json())
-                    .then(data => {
-                      if (data[0].Status === "Success") {
-                        const post = data[0].PostOffice[0];
-                        setCity(post.District);
-                        setState(post.State);
-                        setAreaValue(post.Name);
-                      }
-                    });
-                }
-              }}
-              className="h-9 px-3 rounded bg-white outline-none border-l-4 border-blue-500" 
-              placeholder="Pincode : (Auto-fills Area/City/State)" 
-            />
-
-            <input 
-              name="area" 
-              required 
-              value={areaValue}
-              onChange={(e) => setAreaValue(e.target.value)}
-              className="h-9 px-3 rounded bg-white outline-none border-l-4 border-[#0b4b4b]" 
-              placeholder="Area / Locality :" 
             />
 
             <textarea
@@ -509,57 +373,38 @@ const NewMember: FC = () => {
               placeholder="Full Office Address :"
             />
 
-            <div className="grid grid-cols-2 gap-2">
-              <input 
-                name="city"
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-                className="h-9 px-3 rounded bg-white outline-none border-l-4 border-[#0b4b4b]"
-                placeholder="City :"
-              />
-
-              <input 
-                name="state"
-                value={state}
-                onChange={(e) => setState(e.target.value)}
-                className="h-9 px-3 rounded bg-white outline-none border-l-4 border-[#0b4b4b]"
-                placeholder="State :"
-              />
-            </div>
-
             <input name="emailWebsite" className="h-9 px-3 rounded bg-white outline-none border-l-4 border-[#0b4b4b]" placeholder="email / website :" />
           </div>
 
 
           {/* PDF + Call Section */}
-          <div className="flex items-center gap-3 mt-3 px-8">
+          <div className="flex items-center justify-between gap-3 mt-4 px-1 py-1 bg-transparent">
 
-            {/* PDF Download Button */}
-            <div 
+            {/* PDF Download Button from Image */}
+            <img
+              src="/images/new_member_pdf.png"
+              alt="PDF Download"
               onClick={handleDownloadPDF}
-              className="relative flex flex-col items-center justify-center bg-white border-2 border-red-400 rounded-md w-[65px] h-[80px] cursor-pointer"
-            >
-              <FaFilePdf className="text-red-600 text-xl" />
-              <span className="text-[10px] font-semibold mt-1 text-center truncate w-full px-1">
-                PDF
-              </span>
-            </div>
+              className="w-[50px] h-[64px] object-contain shrink-0 cursor-pointer hover:scale-105 active:scale-95 transition-transform"
+            />
 
-            {/* Text */}
-            <p className="text-[11px] text-gray-800 italic leading-tight flex-1">
-              download pdf form fill and submit to Surat East Builder Association and
-              use contact button for <b>SEBA</b> inquiry.
+            {/* Elegant Georgia Italic Text */}
+            <p className="font-georgia italic font-medium text-[10.5px] text-gray-800 leading-[1.3] flex-1 text-center px-1">
+              download pdf form fill and submit to<br />
+              Surat East Builder Association and<br />
+              use contact button for SEBA inquiry.
             </p>
 
-            {/* Call Button */}
-            <a 
+            {/* Call Button from Image */}
+            <a
               href="tel:+917990521193"
-              className="flex items-star bg-[#e5e5e5] rounded-lg px-1 py-1 shadow-sm border border-gray-300 border-t-2 border-t-black h-[48px] no-underline"
+              className="shrink-0 hover:scale-105 active:scale-95 transition-transform"
             >
-              <HiOutlinePhone className="text-3xl text-green-600 mt-1" />
-              <span className="text-[11px] mt-[8px] font-medium text-gray-700 leading-none ml-1">
-                Call
-              </span>
+              <img
+                src="/images/new_member_call.png"
+                alt="Call"
+                className="w-[82px] h-[64px] object-contain"
+              />
             </a>
           </div>
 
@@ -574,7 +419,7 @@ const NewMember: FC = () => {
         {showCropper && originalImage && (
           <div className="absolute inset-0 bg-[#eeeeee] z-50 flex flex-col items-center justify-start p-5 pt-10">
             <h3 className="text-gray-900 text-[16px] font-bold uppercase tracking-wider mb-6 italic">Adjust Passport Photo</h3>
-            
+
             {/* Crop Frame */}
             <div className="relative w-full h-[300px] bg-gray-900 rounded-lg overflow-hidden shadow-inner">
               <Cropper
@@ -597,29 +442,29 @@ const NewMember: FC = () => {
                 <span className="text-xs text-gray-700 font-bold">Zoom Scale:</span>
                 <span className="text-xs text-[#0b4b4b] font-extrabold">{zoom.toFixed(1)}x</span>
               </div>
-              <input 
-                type="range" 
-                min="1" 
-                max="3" 
-                step="0.1" 
-                value={zoom} 
-                onChange={(e) => setZoom(parseFloat(e.target.value))} 
+              <input
+                type="range"
+                min="1"
+                max="3"
+                step="0.1"
+                value={zoom}
+                onChange={(e) => setZoom(parseFloat(e.target.value))}
                 className="w-full h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer accent-[#0b4b4b]"
               />
             </div>
 
             {/* Actions */}
             <div className="flex gap-4 mt-6 w-full max-w-[280px]">
-              <button 
-                type="button" 
-                onClick={() => setShowCropper(false)} 
+              <button
+                type="button"
+                onClick={() => setShowCropper(false)}
                 className="flex-1 bg-white border border-gray-300 text-gray-600 py-3 rounded-xl text-sm font-bold hover:bg-gray-50 transition-all cursor-pointer shadow-sm active:scale-95"
               >
                 Cancel
               </button>
-              <button 
-                type="button" 
-                onClick={handleCrop} 
+              <button
+                type="button"
+                onClick={handleCrop}
                 className="flex-1 bg-[#0b4b4b] text-white py-3 rounded-xl text-sm font-bold hover:bg-[#083737] transition-all shadow-md cursor-pointer active:scale-95"
               >
                 Apply Crop

@@ -64,7 +64,7 @@ const Search = () => {
         if (newIsOn) {
             const params = new URLSearchParams();
             const isAllCategories = category === "All Categories" || !category;
-            
+
             if (!isAllCategories) {
                 params.append('category', category);
                 if (subCategory && subCategory !== "All Sub Categories") {
@@ -74,10 +74,10 @@ const Search = () => {
             if (area) {
                 params.append('area', area);
             }
-            
+
             const queryString = params.toString();
             const query = queryString ? `?${queryString}` : '';
-            
+
             setTimeout(() => {
                 router.push(`/search/results${query}`);
             }, 500);
@@ -108,102 +108,80 @@ const Search = () => {
                         </p>
                     </div>
                     {/* Profile */}
-                    <div className="absolute right-4 top-4">
-                        <div className="p-[3px] rounded-full bg-yellow-300 shadow-[0_0_15px_#facc15]">
-                            <div className="w-14 h-14 rounded-full overflow-hidden bg-white">
-                                <img
-                                    src="/images/auth_page_1.png"
-                                    className="w-full h-full object-cover"
-                                    alt="profile"
-                                />
-                            </div>
-                        </div>
+                    <div className="absolute right-[-14px] top-[-14px] z-20">
+                        <img
+                            src="/images/search_profile.png"
+                            className="w-[110px] h-[110px] object-contain"
+                            alt="profile"
+                        />
                     </div>
                 </div>
 
                 <div className="flex justify-center mt-12 mb-6">
-                    <h1 className="flex items-center text-[42px] tracking-[0.5px] font-[Poppins]">
-
-                        {/* Styled S */}
-                        <span className="text-red-600 font-extrabold text-[46px] leading-none mr-[2px] tracking-tight">
-                            S
-                        </span>
-
-                        {/* earch */}
-                        <span className="text-gray-800 font-bold">earch</span>
-
-                        {/* Space */}
-                        <span className="mx-[4px] text-gray-800 font-bold"></span>
-
-                        {/* P */}
-                        <span className="text-gray-700 font-bold">P</span>
-
-                        {/* Search Icon */}
-                        <FiSearch className="text-blue-500 text-[32px] mt-[6px] mx-[1px]" />
-
-                        {/* int */}
-                        <span className="text-gray-800 font-bold">int</span>
-
-                    </h1>
+                    <img
+                        src="/images/search_point.png"
+                        alt="Search Point"
+                        className="w-[250px] h-auto object-contain"
+                    />
                 </div>
 
                 {/* Dropdowns */}
-                    <div className="flex flex-col gap-5 px-1">
-                        <SearchableSelect 
-                            options={combinedOptions}
-                            value={subCategory || category}
-                            onChange={(val, opt) => {
-                                if (val === "All Categories") {
-                                    setCategory("All Categories");
-                                    setSubCategory("");
-                                } else if (opt?.isSub) {
-                                    setCategory(opt.parentCategory || "");
-                                    setSubCategory(opt.name);
-                                } else {
-                                    setCategory(val);
-                                    setSubCategory("");
-                                }
-                            }}
-                            placeholder="Category / Sub Category"
-                            showOthers={false}
-                            triggerStyle={{
-                                background: "#f7f7f7",
-                                boxShadow: "inset 0 3px 2px rgba(0,0,0,0.1), 0 1px 2px white",
-                                border: "1px solid #cfcfcf",
-                                borderRadius: "9999px",
-                                height: "50px",
-                                paddingRight: "5px",
-                                paddingLeft: "1.25rem"
-                            }}
-                            customIcon={
-                                <div className="w-10 h-10 bg-[#28b446] rounded-full flex items-center justify-center shadow-md">
-                                    <IoCaretDownOutline className="text-white text-xl" />
-                                </div>
+                <div className="flex flex-col gap-5 px-1">
+                    <SearchableSelect
+                        options={combinedOptions}
+                        value={subCategory || category}
+                        onChange={(val, opt) => {
+                            if (val === "All Categories") {
+                                setCategory("All Categories");
+                                setSubCategory("");
+                            } else if (opt?.isSub) {
+                                setCategory(opt.parentCategory || "");
+                                setSubCategory(opt.name);
+                            } else {
+                                setCategory(val);
+                                setSubCategory("");
                             }
-                        />
+                        }}
+                        placeholder="Category / Sub Category"
+                        showOthers={false}
+                        triggerStyle={{
+                            background: "#f7f7f7",
+                            boxShadow: "inset 0 3px 2px rgba(0,0,0,0.1), 0 1px 2px white",
+                            border: "1px solid #cfcfcf",
+                            borderRadius: "9999px",
+                            height: "50px",
+                            paddingRight: "5px",
+                            paddingLeft: "1.25rem"
+                        }}
+                        customIcon={
+                            <div className="w-10 h-10 bg-[#28b446] rounded-full flex items-center justify-center shadow-md">
+                                <IoCaretDownOutline className="text-white text-xl" />
+                            </div>
+                        }
+                    />
 
-                        <SearchableSelect 
-                            options={areas.map(a => ({ name: a }))}
-                            value={area}
-                            onChange={(val) => setArea(val)}
-                            placeholder="Area"
-                            showOthers={false}
-                            triggerStyle={{
-                                background: "#f7f7f7",
-                                boxShadow: "inset 0 3px 2px rgba(0,0,0,0.1), 0 1px 2px white",
-                                border: "1px solid #cfcfcf",
-                                borderRadius: "9999px",
-                                height: "50px",
-                                paddingRight: "5px",
-                                paddingLeft: "1.25rem"
-                            }}
-                            customIcon={
-                                <div className="w-10 h-10 bg-[#28b446] rounded-full flex items-center justify-center shadow-md">
-                                    <IoCaretDownOutline className="text-white text-xl" />
-                                </div>
-                            }
-                        />
-                    </div>
+                    <SearchableSelect
+                        options={areas.map(a => ({ name: a }))}
+                        value={area}
+                        onChange={(val) => setArea(val)}
+                        placeholder="Area"
+                        showOthers={false}
+                        triggerStyle={{
+                            background: "#f7f7f7",
+                            boxShadow: "inset 0 3px 2px rgba(0,0,0,0.1), 0 1px 2px white",
+                            border: "1px solid #cfcfcf",
+                            borderRadius: "9999px",
+                            height: "50px",
+                            paddingRight: "5px",
+                            paddingLeft: "1.25rem"
+                        }}
+                        customIcon={
+                            <div className="w-10 h-10 bg-[#28b446] rounded-full flex items-center justify-center shadow-md">
+                                <IoCaretDownOutline className="text-white text-xl" />
+                            </div>
+                        }
+                    />
+                </div>
 
                 {/* Radio button */}
                 <div className="flex justify-center mt-5">
