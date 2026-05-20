@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { FiSearch } from "react-icons/fi";
 import { BsGlobe, BsShare } from "react-icons/bs";
 import { IoCaretDownOutline } from "react-icons/io5";
@@ -18,13 +18,73 @@ const Search = () => {
     const router = useRouter();
     const [isOn, setIsOn] = useState(false);
     const [openDropdown, setOpenDropdown] = useState<string | null>(null);
-    const [category, setCategory] = useState("All Categories");
+    const [category, setCategory] = useState("");
     const [subCategory, setSubCategory] = useState("");
-    const [area, setArea] = useState("");
+    const [area, setArea] = useState("All Area");
     const [categories, setCategories] = useState<any[]>([]);
     const [subCategories, setSubCategories] = useState<any[]>([]);
     const [areas, setAreas] = useState<string[]>([]);
     const [sponsors, setSponsors] = useState<any[]>([]);
+
+    const [dragX, setDragX] = useState<number | null>(null);
+    const [isDragging, setIsDragging] = useState(false);
+    const dragStartRef = useRef<{ startX: number; base: number; hasMoved: boolean } | null>(null);
+
+    useEffect(() => {
+        if (!isDragging) return;
+
+        const handleMove = (clientX: number) => {
+            if (!dragStartRef.current) return;
+            const deltaX = clientX - dragStartRef.current.startX;
+            if (Math.abs(deltaX) > 5) {
+                dragStartRef.current.hasMoved = true;
+            }
+            let newX = dragStartRef.current.base + deltaX;
+            if (newX < 2) newX = 2;
+            if (newX > 87) newX = 87;
+            setDragX(newX);
+        };
+
+        const handleMouseMove = (e: MouseEvent) => {
+            handleMove(e.clientX);
+        };
+
+        const handleTouchMove = (e: TouchEvent) => {
+            if (e.touches.length > 0) {
+                handleMove(e.touches[0].clientX);
+            }
+        };
+
+        const handleUp = () => {
+            setIsDragging(false);
+            if (dragStartRef.current) {
+                const { hasMoved } = dragStartRef.current;
+                const currentDragX = dragX !== null ? dragX : (isOn ? 87 : 2);
+                dragStartRef.current = null;
+                setDragX(null);
+
+                if (hasMoved) {
+                    const threshold = 2 + (87 - 2) / 2; // 44.5px
+                    const shouldBeOn = currentDragX > threshold;
+                    handleToggleState(shouldBeOn);
+                } else {
+                    handleToggleClick();
+                }
+            }
+        };
+
+        window.addEventListener("mousemove", handleMouseMove);
+        window.addEventListener("mouseup", handleUp);
+        window.addEventListener("touchmove", handleTouchMove, { passive: true });
+        window.addEventListener("touchend", handleUp);
+
+        return () => {
+            window.removeEventListener("mousemove", handleMouseMove);
+            window.removeEventListener("mouseup", handleUp);
+            window.removeEventListener("touchmove", handleTouchMove);
+            window.removeEventListener("touchend", handleUp);
+        };
+    }, [isDragging, isOn, dragX]);
 
     useEffect(() => {
         const fetchOptions = async () => {
@@ -58,20 +118,16 @@ const Search = () => {
         setOpenDropdown(openDropdown === type ? null : type);
     };
 
-    const handleToggle = async () => {
-        const newIsOn = !isOn;
-        setIsOn(newIsOn);
-        if (newIsOn) {
+    const triggerSearchRedirect = (targetIsOn: boolean) => {
+        if (targetIsOn) {
             const params = new URLSearchParams();
-            const isAllCategories = category === "All Categories" || !category;
-
-            if (!isAllCategories) {
+            if (category) {
                 params.append('category', category);
-                if (subCategory && subCategory !== "All Sub Categories") {
+                if (subCategory) {
                     params.append('subCategory', subCategory);
                 }
             }
-            if (area) {
+            if (area && area !== "All Area") {
                 params.append('area', area);
             }
 
@@ -84,9 +140,40 @@ const Search = () => {
         }
     };
 
+    const handleToggleState = (targetIsOn: boolean) => {
+        setIsOn(targetIsOn);
+        setDragX(null);
+        triggerSearchRedirect(targetIsOn);
+    };
+
+    const handleToggleClick = () => {
+        const nextIsOn = !isOn;
+        handleToggleState(nextIsOn);
+    };
+
+    const handleStartDrag = (clientX: number) => {
+        const baseTranslate = isOn ? 87 : 2;
+        dragStartRef.current = {
+            startX: clientX,
+            base: baseTranslate,
+            hasMoved: false
+        };
+        setDragX(baseTranslate);
+        setIsDragging(true);
+    };
+
+    const onMouseDown = (e: React.MouseEvent) => {
+        e.preventDefault();
+        handleStartDrag(e.clientX);
+    };
+
+    const onTouchStart = (e: React.TouchEvent) => {
+        handleStartDrag(e.touches[0].clientX);
+    };
+
     const coSponsor = sponsors.find(s => s.type === 'co-sponsor');
 
-    const combinedOptions: any[] = [{ name: "All Categories" }];
+    const combinedOptions: any[] = [];
     categories.forEach(cat => {
         combinedOptions.push({ name: cat.name });
         if (Array.isArray(cat.subCategories)) {
@@ -131,8 +218,8 @@ const Search = () => {
                         options={combinedOptions}
                         value={subCategory || category}
                         onChange={(val, opt) => {
-                            if (val === "All Categories") {
-                                setCategory("All Categories");
+                            if (val === (subCategory || category)) {
+                                setCategory("");
                                 setSubCategory("");
                             } else if (opt?.isSub) {
                                 setCategory(opt.parentCategory || "");
@@ -161,7 +248,7 @@ const Search = () => {
                     />
 
                     <SearchableSelect
-                        options={areas.map(a => ({ name: a }))}
+                        options={[{ name: "All Area" }, ...areas.map(a => ({ name: a }))]}
                         value={area}
                         onChange={(val) => setArea(val)}
                         placeholder="Area"
@@ -186,8 +273,9 @@ const Search = () => {
                 {/* Radio button */}
                 <div className="flex justify-center mt-5">
                     <div
-                        onClick={handleToggle}
-                        className="relative w-[180px] h-[58px] rounded-full p-[3px] cursor-pointer flex items-center transition-all duration-300"
+                        onMouseDown={onMouseDown}
+                        onTouchStart={onTouchStart}
+                        className="relative w-[180px] h-[58px] rounded-full p-[3px] cursor-pointer flex items-center transition-all duration-300 select-none"
                     >
                         <div
                             className="absolute inset-[4px] rounded-full overflow-hidden"
@@ -198,44 +286,48 @@ const Search = () => {
                             }}
                         >
                             <div
-                                className={`absolute inset-0 transition-opacity duration-500 ${isOn ? "opacity-100" : "opacity-0"
-                                    }`}
+                                className="absolute inset-0"
                                 style={{
                                     background: "linear-gradient(to bottom, #28b446, #1e9a3a)",
-                                    boxShadow: "inset 0 4px 8px rgba(0,0,0,0.2)"
+                                    boxShadow: "inset 0 4px 8px rgba(0,0,0,0.2)",
+                                    opacity: dragX !== null ? (dragX - 2) / 85 : (isOn ? 1 : 0),
+                                    transition: dragX !== null ? "none" : "opacity 0.5s ease"
                                 }}
                             />
                         </div>
                         <div
-                            className="absolute h-[46px] w-[90px] rounded-full transition-all duration-500 flex items-center px-[5px]"
+                            className="absolute h-[46px] w-[90px] rounded-full flex items-center px-[5px]"
                             style={{
-                                transform: isOn ? "translateX(87px)" : "translateX(2px)",
+                                transform: dragX !== null ? `translateX(${dragX}px)` : (isOn ? "translateX(87px)" : "translateX(2px)"),
+                                transition: dragX !== null ? "none" : "all 0.5s ease",
                                 backgroundColor: "#fcfcfc",
                                 background: "linear-gradient(to bottom, #ffffff, #e0e0e0)",
                                 boxShadow: "0 6px 15px rgba(0,0,0,0.3), inset 0 2px 2px white", // Pop-out effect
-                                zIndex: 1
+                                zIndex: 1,
+                                cursor: "grab"
                             }}
                         >
                             <div
-                                className="w-[46px] h-[36px] rounded-full transition-all duration-500"
+                                className="w-[46px] h-[36px] rounded-full"
                                 style={{
                                     background: "radial-gradient(circle at 30% 30%, #ffffff, #d4d4d4)",
                                     boxShadow: "0 2px 4px rgba(0,0,0,0.2), inset -1px -1px 3px rgba(0,0,0,0.1)",
-                                    transform: isOn ? "translateX(39px)" : "translateX(0px)"
+                                    transform: dragX !== null ? `translateX(${(dragX - 2) * (39 / 85)}px)` : (isOn ? "translateX(39px)" : "translateX(0px)"),
+                                    transition: dragX !== null ? "none" : "all 0.5s ease"
                                 }}
                             />
                         </div>
                         {/* Text ON / OFF */}
                         <span
-                            className={`absolute transition-all duration-500 font-bold text-xl select-none text-white`}
+                            className="absolute font-bold text-xl select-none text-white"
                             style={{
                                 zIndex: 5,
-                                left: isOn ? "25px" : "115px",
-                                opacity: 1,
-                                textShadow: "0 1px 2px rgba(0,0,0,0.3)"
+                                left: dragX !== null ? `${25 + (1 - (dragX - 2) / 85) * 90}px` : (isOn ? "25px" : "115px"),
+                                textShadow: "0 1px 2px rgba(0,0,0,0.3)",
+                                transition: dragX !== null ? "none" : "all 0.5s ease"
                             }}
                         >
-                            {isOn ? "ON" : "OFF"}
+                            {dragX !== null ? (dragX > 44.5 ? "ON" : "OFF") : (isOn ? "ON" : "OFF")}
                         </span>
                     </div>
                 </div>

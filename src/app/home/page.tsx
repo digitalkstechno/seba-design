@@ -220,17 +220,17 @@ const HomeContent = () => {
                 onClick={() => handleMenuClick(item)}
                 className="flex flex-col items-center cursor-pointer group"
               >
-                <div className="bg-white rounded-xl w-[70px] h-[70px] flex justify-center items-center shadow-md border border-gray-200 group-hover:bg-gray-50 transition-all overflow-hidden relative">
+                <div className="bg-[#dbdbdb] rounded-[18px] w-[70px] h-[70px] flex justify-center items-center shadow-sm group-hover:bg-[#d0d0d0] transition-all overflow-hidden relative">
                   <Image
                     src={item.img}
                     alt={item.label}
-                    width={150}
-                    height={150}
-                    className="object-contain max-w-none scale-[2.1]"
+                    width={100}
+                    height={100}
+                    className="object-contain max-w-none scale-[1.4] transition-transform duration-200 group-hover:scale-[1.48]"
                   />
                 </div>
 
-                <p className="text-[12px] mt-2 italic font-bold text-gray-700">
+                <p className="text-[12px] mt-2.5 italic text-gray-800 text-center leading-tight">
                   {item.label}
                 </p>
               </div>

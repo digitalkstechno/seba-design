@@ -19,16 +19,16 @@ type AssociationCardProps = Association
 
 // Components
 const AssociationCard: FC<AssociationCardProps> = ({ name, img }) => (
-  <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
-    <div className="h-[110px] overflow-hidden">
+  <div className="bg-white rounded-2xl shadow-sm overflow-hidden flex flex-col h-full">
+    <div className="h-[110px] bg-white flex items-center justify-center p-2.5 overflow-hidden">
       <img
         src={img}
         alt={name}
-        className="w-full h-full object-cover object-top"
+        className="max-w-full max-h-full object-contain"
       />
     </div>
 
-    <div className="bg-gray-300 text-center text-[11px] py-2 font-medium leading-tight px-1">
+    <div className="bg-gray-300 text-center text-[11px] py-2 font-medium leading-tight px-1 mt-auto">
       {name}
     </div>
   </div>

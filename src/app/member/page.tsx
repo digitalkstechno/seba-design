@@ -122,24 +122,29 @@ const MemberContent: FC = () => {
 
                 {/* Image + ID */}
                 <div className="w-[70px] text-center text-[11px]">
-                  <div className="w-[60px] h-[70px] bg-gray-50 flex items-center justify-center mx-auto overflow-hidden">
+                  <div className="w-[70px] h-[80px] bg-white flex items-center justify-center mx-auto overflow-hidden rounded-md border border-gray-200 shadow-sm">
                     <img
                       src={member.image}
                       alt={member.name}
-                      className="max-w-full max-h-full object-contain"
+                      className="w-full h-full object-cover"
                     />
                   </div>
                   <p className="mt-1 font-medium">{member.id}</p>
                 </div>
 
                 {/* Details */}
-                <div className="flex-1 text-[12px] leading-5 pr-1">
-                  <p className="font-semibold text-[13px]">
+                <div className="flex-1 text-[12px] leading-5 pr-1 flex flex-col justify-center">
+                  <p className="font-semibold text-[13px] leading-snug">
                     {member.name}
                   </p>
-                  <p className="font-semibold">{member.company}</p>
-                  <p>{member.mobile}</p>
-                  <p className="truncate">{member.address}</p>
+                  {member.category && (
+                    <p className="text-gray-500 font-bold text-[10.5px] mt-0.5 uppercase tracking-wider">
+                      {member.category}
+                    </p>
+                  )}
+                  <p className="font-semibold text-gray-800 mt-0.5">{member.company}</p>
+                  <p className="text-gray-600 mt-0.5 font-medium">{member.mobile}</p>
+                  <p className="text-gray-500 mt-0.5 leading-normal">{member.address}</p>
                 </div>
 
               </div>

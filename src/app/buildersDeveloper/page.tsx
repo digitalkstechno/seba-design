@@ -6,7 +6,6 @@ import { AiOutlineHome } from "react-icons/ai"
 import { BsGlobe, BsShare } from "react-icons/bs"
 import { IoIosArrowBack } from "react-icons/io"
 import { LuLayoutDashboard } from "react-icons/lu"
-import { RiWifiFill } from "react-icons/ri"
 import Footer from "@/components/Footer"
 
 // Types
@@ -15,75 +14,77 @@ type Member = {
   company: string
   address: string
   img: string
+  hasNfcCard?: boolean
+  cardId?: string | null
 }
 
 // Dummy Data (safe copy)
-const MEMBERS: Member[] = Array.from({ length: 6 }, () => ({
-  name: "HIRENBHAI K. PATEL - Media Head",
+const MEMBERS: Member[] = Array.from({ length: 6 }, (_, i) => ({
+  name: i < 3 ? "HIRENBHAI K. PATEL - Media Head" : "HIRENBHAI K. PATEL - Media Head (No NFC)",
   company: "M K GROUP",
   address: "B-86 Trikam Nagar Society, Near V-1 .....",
-  img: "/images/auth_page_1.png"
+  img: "/images/auth_page_1.png",
+  hasNfcCard: i < 3,
+  cardId: i < 3 ? "dummy-card-id" : null
 }))
 
-// Components
-const MemberCard: FC<{ member: Member; onClick: () => void }> = ({ member, onClick }) => (
-  <div className="flex items-center">
+const MemberCard: FC<{ member: Member }> = ({ member }) => {
+  const handleCardClick = () => {
+    if (member.hasNfcCard && member.cardId) {
+      window.location.href = `${process.env.NEXT_PUBLIC_CARD_URL}/${member.cardId}?view=home`
+    }
+  }
 
-    {/* Card */}
-    <div
-      onClick={onClick}
-      className="bg-white cursor-pointer rounded-xl flex items-center shadow-sm border border-gray-100 h-[70px] flex-1 overflow-hidden"
-    >
+  return (
+    <div className="flex items-center relative pr-2">
       {/* Profile */}
-      <div className="pl-2">
-        <div className="w-[62px] h-[62px] rounded-full border-[1.5px] border-[#00a9e0] overflow-hidden">
-          <img
-            src={member.img}
-            alt={member.name}
-            className="w-full h-full object-cover"
-          />
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="flex-1 ml-3 pr-2">
-        <div className="border-b border-[#00a9e0]">
-          <p className="font-bold text-[12px] truncate">
-            {member.name}
-          </p>
-        </div>
-
-        <div className="border-b border-[#00a9e0] py-[1px]">
-          <p className="text-[11px] font-semibold">
-            {member.company}
-          </p>
-        </div>
-
-        <p className="text-[11px] font-semibold truncate">
-          {member.address}
-        </p>
-      </div>
-    </div>
-
-    {/* Triangle */}
-    <div className="ml-[2px] flex items-center">
-      <div
-        className="relative w-[25px] h-[30px] flex items-center justify-center"
-        style={{
-          clipPath: 'polygon(0% 0%, 100% 50%, 0% 100%)',
-          background: 'linear-gradient(to bottom, #e31e24 50%, #a11c1f 50%)'
-        }}
-      >
-        <div className="absolute left-[2px] top-1/2 -translate-y-1/2 w-[7px] h-[7px] bg-white border border-[#a11c1f] rounded-full" />
-
-        <RiWifiFill
-          className="text-white text-[12px] ml-[4px]"
-          style={{ transform: "rotate(90deg)" }}
+      <div className="w-[70px] h-[70px] rounded-full border-[1.5px] border-[#00a9e0] overflow-hidden p-[1px] bg-[#eeeeee] shrink-0 z-10 shadow-sm relative">
+        <img
+          src={member.img}
+          alt={member.name}
+          className="w-full h-full rounded-full object-cover"
         />
       </div>
+
+      {/* Card */}
+      <div
+        onClick={handleCardClick}
+        className={`bg-white rounded-r-[20px] rounded-l-[35px] flex items-center shadow-sm border border-gray-100 h-[70px] flex-1 ml-[-35px] pl-[45px] pr-2 overflow-hidden ${
+          member.hasNfcCard ? "cursor-pointer mr-8" : "cursor-default"
+        }`}
+      >
+        {/* Content */}
+        <div className="flex-1 min-w-0 flex flex-col justify-center">
+          <div className="border-b-[1.5px] border-[#00a9e0] pb-[1px] mb-[1px]">
+            <p className="font-bold text-[12px] truncate uppercase leading-tight text-black pr-8">
+              {member.name}
+            </p>
+          </div>
+
+          <div className="border-b-[1.5px] border-[#00a9e0] py-[1px]">
+            <p className="text-[11px] font-bold truncate uppercase text-gray-800 leading-tight pr-8">
+              {member.company}
+            </p>
+          </div>
+
+          <p className="text-[11px] font-semibold truncate text-gray-500 mt-[2px] italic leading-tight pr-8">
+            {member.address}
+          </p>
+        </div>
+      </div>
+
+      {/* Arrow Image */}
+      {member.hasNfcCard && (
+        <img
+          onClick={handleCardClick}
+          src="/images/arrow-01.png"
+          alt="NFC Card"
+          className="absolute -right-[12px] top-1/2 -translate-y-1/2 z-10 w-[70px] h-[70px] object-contain cursor-pointer active:scale-95 transition-transform"
+        />
+      )}
     </div>
-  </div>
-)
+  )
+}
 
 
 // Main Component
@@ -106,12 +107,12 @@ const BuildersDeveloper: FC = () => {
         </div>
 
         {/* Info Banner */}
-        <div className="px-4 py-2">
-          <div className="bg-white rounded-full py-1 border flex justify-center">
-            <p className="text-[12px] font-bold italic text-[#3b4db0]">
-              Alphabetically <span className="font-bold">NFC card holder name</span> come first
-            </p>
-          </div>
+        <div className="px-4 py-2 flex justify-center">
+          <img 
+            src="/images/text-01.png"
+            alt="Alphabetically NFC card holder name come first"
+            className="w-full h-auto object-contain"
+          />
         </div>
 
         {/* List */}
@@ -121,7 +122,6 @@ const BuildersDeveloper: FC = () => {
             <MemberCard
               key={index}
               member={member}
-              onClick={() => router.push('/memberDetail')}
             />
           ))}
 

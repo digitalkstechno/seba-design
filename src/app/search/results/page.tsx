@@ -7,8 +7,8 @@ import { AiOutlineHome } from "react-icons/ai"
 import { BsGlobe, BsShare } from "react-icons/bs"
 import { IoIosArrowBack } from "react-icons/io"
 import { LuLayoutDashboard } from "react-icons/lu"
-import { RiWifiFill } from "react-icons/ri"
 import Footer from "@/components/Footer"
+import FooterSponsors from "@/components/FooterSponsors"
 
 // Types
 type Member = {
@@ -82,7 +82,7 @@ const ResultsContent: FC = () => {
         let query = `/seba/member?`
         if (urlCategory) query += `category=${encodeURIComponent(urlCategory)}&`
         if (urlSubCategory) query += `subCategory=${encodeURIComponent(urlSubCategory)}&`
-        if (urlArea) query += `area=${encodeURIComponent(urlArea)}`
+        if (urlArea && urlArea !== "All Area") query += `area=${encodeURIComponent(urlArea)}`
 
         const { data } = await api.get(query)
         if (data.status === 'Success') {
@@ -123,19 +123,25 @@ const ResultsContent: FC = () => {
 
         {/* Header */}
         <div className="flex items-center gap-2 mb-4">
-          <div 
+          <IoIosArrowBack
             onClick={() => router.back()}
-            className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm cursor-pointer"
-          >
-            <IoIosArrowBack className="text-xl text-gray-700" />
-          </div>
-          <p className="text-[14px] font-black text-[#0b4b4b] uppercase tracking-tight ml-2 truncate">
+            className="text-2xl cursor-pointer text-gray-800 hover:text-black transition-colors"
+          />
+          <p className="text-[16px] font-black text-gray-800 uppercase tracking-tight ml-1 truncate">
             {urlCategory && urlCategory !== 'All Categories' ? (
               urlSubCategory ? `${urlCategory.toUpperCase()} - ${urlSubCategory.toUpperCase()}` : urlCategory.toUpperCase()
             ) : "SEBA MEMBERS"}
           </p>
         </div>
 
+        {/* Info Banner */}
+        <div className="px-1 mb-3 flex justify-center">
+          <img 
+            src="/images/text-01.png"
+            alt="Alphabetically NFC card holder name come first"
+            className="w-full h-auto object-contain"
+          />
+        </div>
 
         {/* List */}
         <div className="flex-1 overflow-y-auto px-1 py-2 space-y-3 no-scrollbar pb-32">
@@ -144,74 +150,68 @@ const ResultsContent: FC = () => {
           ) : members.length === 0 ? (
              <div className="flex justify-center py-10"><p className="text-gray-400 italic">No members found in this area.</p></div>
           ) : members.map((member) => (
-            <div key={member.id} className="flex items-center">
-              {/* Card */}
-              <div className="bg-white rounded-[35px] flex items-center shadow-sm border border-gray-100 h-[75px] flex-1 overflow-hidden relative">
-                {/* Profile */}
-                <div className="pl-2 shrink-0">
-                  <div className="w-[62px] h-[62px] rounded-full border-[1.5px] border-[#00a9e0] overflow-hidden p-[1px]">
-                    <img
-                      src={member.image}
-                      alt={member.name}
-                      className="w-full h-full rounded-full object-cover"
-                    />
-                  </div>
-                </div>
+            <div key={member.id} className="flex items-center relative pr-2">
+              {/* Profile */}
+              <div className="w-[70px] h-[70px] rounded-full border-[1.5px] border-[#00a9e0] overflow-hidden p-[1px] bg-[#eeeeee] shrink-0 z-10 shadow-sm relative">
+                <img
+                  src={member.image}
+                  alt={member.name}
+                  className="w-full h-full rounded-full object-cover"
+                />
+              </div>
 
+              {/* Card */}
+              <div 
+                onClick={() => {
+                  if (member.hasNfcCard && member.cardId) {
+                    try {
+                      localStorage.setItem('seba:navigatedToCard', 'true');
+                    } catch (e) {}
+                    window.location.href = `${process.env.NEXT_PUBLIC_CARD_URL}/${member.cardId}?view=home`;
+                  }
+                }}
+                className={`bg-white rounded-r-[10px] rounded-l-[5px] flex items-center shadow-sm border border-gray-100 h-[70px] flex-1 ml-[-35px] pl-[45px] pr-2 overflow-hidden ${member.hasNfcCard ? "cursor-pointer mr-3" : "cursor-default"}`}
+              >
                 {/* Content */}
-                <div className="flex-1 ml-3 pr-8 min-w-0 flex flex-col justify-center">
+                <div className="flex-1 min-w-0 flex flex-col justify-center">
                   <div className="border-b-[1.5px] border-[#00a9e0] pb-[1px] mb-[1px]">
-                    <p className="font-bold text-[12px] truncate uppercase leading-tight text-black">
+                    <p className="font-bold text-[12px] truncate uppercase leading-tight text-black pr-8">
                       {member.name}
                     </p>
                   </div>
                   <div className="border-b-[1.5px] border-[#00a9e0] py-[1px]">
-                    <p className="text-[11px] font-bold truncate uppercase text-gray-800 leading-tight">
+                    <p className="text-[11px] font-bold truncate uppercase text-gray-800 leading-tight pr-8">
                       {member.company}
                     </p>
                   </div>
-                  <p className="text-[10px] font-semibold truncate text-gray-500 mt-[2px] italic leading-tight">
+                  <p className="text-[11px] font-semibold truncate text-gray-500 mt-[2px] italic leading-tight pr-8">
                     {[member.address, member.area, member.city, member.state, member.pincode].filter(Boolean).join(', ')}
                   </p>
                 </div>
-
-                {/* Detail Arrow - Only for NFC Card holders */}
-                {member.hasNfcCard && (
-                  <div 
-                    onClick={() => {
-                      if (member.cardId) {
-                        try {
-                          localStorage.setItem('seba:navigatedToCard', 'true');
-                        } catch (e) {}
-                        window.location.href = `${process.env.NEXT_PUBLIC_CARD_URL}/${member.cardId}?view=home`;
-                      } else {
-                        router.push(`/memberDetail?id=${member.id}`);
-                      }
-                    }}
-                    className="absolute right-0 top-1/2 -translate-y-1/2 flex items-center cursor-pointer active:scale-95 transition-transform"
-                  >
-                    <div
-                      className="relative w-[40px] h-[52px] flex items-center justify-center drop-shadow-lg"
-                      style={{
-                        clipPath: 'polygon(0% 0%, 100% 50%, 0% 100%)',
-                        background: 'linear-gradient(to right, #e31e24, #881519)'
-                      }}
-                    >
-                      <div className="absolute left-[4px] top-1/2 -translate-y-1/2 w-[6px] h-[6px] bg-white rounded-full shadow-sm" />
-                      <RiWifiFill
-                        className="text-white text-[22px] ml-[6px]"
-                        style={{ transform: "rotate(90deg)" }}
-                      />
-                    </div>
-                  </div>
-                )}
-
               </div>
+
+              {/* Detail Arrow - Only for NFC Card holders */}
+              {member.hasNfcCard && (
+                <img 
+                  onClick={() => {
+                    if (member.cardId) {
+                      try {
+                        localStorage.setItem('seba:navigatedToCard', 'true');
+                      } catch (e) {}
+                      window.location.href = `${process.env.NEXT_PUBLIC_CARD_URL}/${member.cardId}?view=home`;
+                    }
+                  }}
+                  src="/images/arrow-01.png"
+                  alt="NFC Card"
+                  className="absolute -right-[22px] top-1/2 -translate-y-1/2 z-10 w-[70px] h-[70px] object-contain cursor-pointer active:scale-95 transition-transform"
+                />
+              )}
             </div>
           ))}
 
         </div>
 
+        <FooterSponsors type="co-sponsor" />
         <Footer />
 
       </div>

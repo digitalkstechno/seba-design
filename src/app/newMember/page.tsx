@@ -11,45 +11,9 @@ import { AiOutlineHome } from "react-icons/ai"
 import { LuLayoutDashboard } from "react-icons/lu"
 import { IoIosArrowBack } from "react-icons/io"
 import { jsPDF } from "jspdf"
-import Cropper, { Area } from 'react-easy-crop'
 import Footer from "@/components/Footer"
 import { useAlert } from "@/context/AlertContext"
 import { setCookie } from "@/lib/cookies"
-
-const getCroppedImg = (
-  imageSrc: string,
-  pixelCrop: Area
-): Promise<Blob | null> => {
-  return new Promise((resolve, reject) => {
-    const image = new Image()
-    image.src = imageSrc
-    image.onload = () => {
-      const canvas = document.createElement('canvas')
-      const ctx = canvas.getContext('2d')
-      if (!ctx) return reject(null)
-
-      canvas.width = pixelCrop.width
-      canvas.height = pixelCrop.height
-
-      ctx.drawImage(
-        image,
-        pixelCrop.x,
-        pixelCrop.y,
-        pixelCrop.width,
-        pixelCrop.height,
-        0,
-        0,
-        pixelCrop.width,
-        pixelCrop.height
-      )
-
-      canvas.toBlob((blob) => {
-        resolve(blob)
-      }, 'image/jpeg')
-    }
-    image.onerror = (error) => reject(error)
-  })
-}
 
 const NewMember: FC = () => {
   const router = useRouter()
@@ -59,46 +23,14 @@ const NewMember: FC = () => {
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [croppedFile, setCroppedFile] = useState<File | null>(null)
 
-  // Cropper states
-  const [originalImage, setOriginalImage] = useState<string | null>(null)
-  const [showCropper, setShowCropper] = useState(false)
-  const [crop, setCrop] = useState({ x: 0, y: 0 })
-  const [zoom, setZoom] = useState(1)
-  const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null)
-
   const [mobile, setMobile] = useState(formatPhoneNumber(""))
   const [officeNo, setOfficeNo] = useState(formatPhoneNumber(""))
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
-      const reader = new FileReader()
-      reader.onload = () => {
-        setOriginalImage(reader.result as string)
-        setShowCropper(true)
-        setCrop({ x: 0, y: 0 })
-        setZoom(1)
-      }
-      reader.readAsDataURL(file)
-    }
-  }
-
-  const onCropComplete = (croppedArea: Area, croppedAreaPixels: Area) => {
-    setCroppedAreaPixels(croppedAreaPixels)
-  }
-
-  const handleCrop = async () => {
-    if (!originalImage || !croppedAreaPixels) return
-    try {
-      const blob = await getCroppedImg(originalImage, croppedAreaPixels)
-      if (blob) {
-        const file = new File([blob], "passport_photo.jpg", { type: "image/jpeg" })
-        setCroppedFile(file)
-        setImagePreview(URL.createObjectURL(blob))
-        setShowCropper(false)
-      }
-    } catch (e) {
-      console.error(e)
+      setCroppedFile(file)
+      setImagePreview(URL.createObjectURL(file))
     }
   }
 
@@ -319,10 +251,9 @@ const NewMember: FC = () => {
         </div>
 
         <form ref={formRef} onSubmit={handleSubmit} className="flex-1 flex flex-col overflow-y-auto pb-32 no-scrollbar">
-          {/* Upload Box */}
-          <div className="absolute right-4 top-[90px] w-[120px] h-[130px] border-2 border-blue-400 rounded-lg bg-white shadow-sm flex flex-col items-center justify-center text-center text-[12px] overflow-hidden">
+          <div className="absolute right-4 top-[90px] w-[120px] h-[130px] border-2 border-blue-400 rounded-lg bg-[#eeeeee] shadow-sm flex flex-col items-center justify-center text-center text-[12px] overflow-hidden">
             {imagePreview ? (
-              <img src={imagePreview} className="w-full h-full object-cover" />
+              <img src={imagePreview} className="w-full h-full object-contain" />
             ) : (
               <>
                 <p>Your</p>
@@ -416,62 +347,7 @@ const NewMember: FC = () => {
 
         <Footer />
 
-        {showCropper && originalImage && (
-          <div className="absolute inset-0 bg-[#eeeeee] z-50 flex flex-col items-center justify-start p-5 pt-10">
-            <h3 className="text-gray-900 text-[16px] font-bold uppercase tracking-wider mb-6 italic">Adjust Passport Photo</h3>
 
-            {/* Crop Frame */}
-            <div className="relative w-full h-[300px] bg-gray-900 rounded-lg overflow-hidden shadow-inner">
-              <Cropper
-                image={originalImage}
-                crop={crop}
-                zoom={zoom}
-                aspect={3 / 4}
-                restrictPosition={false}
-                onCropChange={setCrop}
-                onCropComplete={onCropComplete}
-                onZoomChange={setZoom}
-              />
-            </div>
-
-            <p className="text-[12px] text-gray-500 font-medium mt-4 italic">Pinch or drag to crop like mobile apps</p>
-
-            {/* Slider */}
-            <div className="w-full max-w-[280px] mt-4 flex flex-col gap-2">
-              <div className="flex justify-between items-center px-1">
-                <span className="text-xs text-gray-700 font-bold">Zoom Scale:</span>
-                <span className="text-xs text-[#0b4b4b] font-extrabold">{zoom.toFixed(1)}x</span>
-              </div>
-              <input
-                type="range"
-                min="1"
-                max="3"
-                step="0.1"
-                value={zoom}
-                onChange={(e) => setZoom(parseFloat(e.target.value))}
-                className="w-full h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer accent-[#0b4b4b]"
-              />
-            </div>
-
-            {/* Actions */}
-            <div className="flex gap-4 mt-6 w-full max-w-[280px]">
-              <button
-                type="button"
-                onClick={() => setShowCropper(false)}
-                className="flex-1 bg-white border border-gray-300 text-gray-600 py-3 rounded-xl text-sm font-bold hover:bg-gray-50 transition-all cursor-pointer shadow-sm active:scale-95"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleCrop}
-                className="flex-1 bg-[#0b4b4b] text-white py-3 rounded-xl text-sm font-bold hover:bg-[#083737] transition-all shadow-md cursor-pointer active:scale-95"
-              >
-                Apply Crop
-              </button>
-            </div>
-          </div>
-        )}
 
       </div>
     </div>

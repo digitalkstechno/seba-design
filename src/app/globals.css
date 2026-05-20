@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,700;1,400;1,700&family=Satisfy&family=Dancing+Script:wght@500;700&display=swap');
 @import "tailwindcss";
 
 @font-face {
@@ -10,6 +10,10 @@
 
 .font-lora {
   font-family: 'Lora', Georgia, Cambria, 'Times New Roman', Times, serif;
+}
+
+.font-cursive {
+  font-family: 'Satisfy', 'Dancing Script', cursive;
 }
 
 :root {
@@ -24,6 +28,7 @@
   --font-mono: var(--font-geist-mono);
   --font-lora: 'Lora', Georgia, Cambria, 'Times New Roman', Times, serif;
   --font-georgia: Georgia, Cambria, "Times New Roman", Times, serif;
+  --font-cursive: 'Satisfy', 'Dancing Script', cursive;
 }
 
 @media (prefers-color-scheme: dark) {
