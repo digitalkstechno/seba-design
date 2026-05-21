@@ -206,7 +206,7 @@ const Search = () => {
 
                 <div className="flex justify-center mt-12 mb-6">
                     <img
-                        src="/images/search_point.png"
+                        src="/images/searching.png"
                         alt="Search Point"
                         className="w-[250px] h-auto object-contain"
                     />
