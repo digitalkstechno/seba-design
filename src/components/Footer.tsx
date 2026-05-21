@@ -28,12 +28,12 @@ const Footer: FC = () => {
         className="flex flex-col items-center cursor-pointer opacity-90 hover:opacity-100 transition-opacity"
       >
         <img src="/images/home icon.png" alt="home" className="w-[28px] h-[28px] object-contain" />
-        <span className="text-[12px] mt-1 font-medium tracking-wide">home</span>
+        <span className="text-[12px] mt-1 font-medium tracking-wide">Home</span>
       </div>
 
       <div className="flex flex-col items-center cursor-pointer opacity-90 hover:opacity-100 transition-opacity">
         <img src="/images/seba-link.png" alt="app link" className="w-[36px] h-[36px] object-contain my-[-4px]" />
-        <span className="text-[12px] mt-1 font-medium tracking-wide">app link</span>
+        <span className="text-[12px] mt-1 font-medium tracking-wide">App Link</span>
       </div>
 
       <div
@@ -49,7 +49,7 @@ const Footer: FC = () => {
         className="flex flex-col items-center cursor-pointer opacity-90 hover:opacity-100 transition-opacity"
       >
         <img src="/images/dropbox.png" alt="dropbox" className="w-[28px] h-[28px] object-contain" />
-        <span className="text-[12px] mt-1 font-medium tracking-wide">dropbox</span>
+        <span className="text-[12px] mt-1 font-medium tracking-wide">Dropbox</span>
       </div>
 
       <button
@@ -57,7 +57,7 @@ const Footer: FC = () => {
         className="flex flex-col items-center cursor-pointer opacity-90 hover:opacity-100 transition-opacity bg-transparent border-none text-white p-0"
       >
         <img src="/images/share.png" alt="share" className="w-[28px] h-[28px] object-contain" />
-        <span className="text-[12px] mt-1 font-medium tracking-wide">share</span>
+        <span className="text-[12px] mt-1 font-medium tracking-wide">Share</span>
       </button>
     </div>
   )

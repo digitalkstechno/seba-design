@@ -56,8 +56,8 @@ const Login: FC = () => {
 
   return (
     <>
-      <div className="h-[100dvh] bg-[#d9d9d9] flex flex-col items-center justify-center overflow-hidden">
-        <div className="w-full max-w-[420px] h-full bg-[#f8f9fa] relative px-5 pt-6 shadow-2xl border border-gray-200 flex flex-col overflow-hidden">
+      <div className="min-h-[100dvh] bg-[#d9d9d9] flex flex-col items-center justify-center overflow-hidden">
+        <div className="w-full max-w-[420px] h-[100dvh] bg-[#f8f9fa] relative px-5 pt-6 shadow-2xl border border-gray-200 flex flex-col overflow-y-auto pb-[65px] scrollbar-none">
           {/* Header */}
           <p className="text-start mt-2 text-[15.5px] text-gray-700 pr-[110px] italic leading-tight font-normal">
             Welcome to <span className="font-bold italic text-black">SEBA</span> Digital
@@ -94,7 +94,7 @@ const Login: FC = () => {
           <form onSubmit={handleSubmit} className="mt-4 flex items-stretch relative">
             <div className="flex-1 space-y-2 relative z-0">
               {/* Name */}
-              <div className="flex items-center bg-white border border-gray-200 rounded-full overflow-hidden h-[45px]">
+              <div className="flex items-center bg-white border border-gray-200 rounded-l-full overflow-hidden h-[45px]">
                 <div className="bg-[#003944] h-full w-[50px] flex items-center justify-center rounded-l-full shrink-0">
                   <FaUser className="text-white text-[17px]" />
                 </div>
@@ -108,7 +108,7 @@ const Login: FC = () => {
               </div>
 
               {/* Mobile */}
-              <div className="flex items-center bg-white border border-gray-200 rounded-full overflow-hidden h-[45px]">
+              <div className="flex items-center bg-white border border-gray-200  rounded-l-full overflow-hidden h-[45px]">
                 <div className="bg-[#003944] h-full w-[50px] flex items-center justify-center rounded-l-full shrink-0">
                   <FaMobileAlt className="text-white text-[17px]" />
                 </div>
@@ -128,7 +128,7 @@ const Login: FC = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-[90px] bg-[#003944] rounded-[24px] relative shadow-lg flex items-center justify-center disabled:opacity-50 hover:scale-[1.02] transition-transform active:scale-95 z-10 ml-[-20px]"
+              className="w-[90px] shrink-0 bg-[#003944] rounded-[24px] relative shadow-lg flex items-center justify-center disabled:opacity-50 hover:scale-[1.02] transition-transform active:scale-95 z-10 ml-[-20px]"
             >
               <div className="absolute inset-[8px] border-[1.5px] border-white/60 rounded-[16px]" />
               {loading ? (
@@ -171,8 +171,8 @@ const Login: FC = () => {
             </div>
           </div>
 
-          {/* Footer positioned absolute bottom to span edge-to-edge cleanly with no bottom/side spaces */}
-          <div className="absolute bottom-0 left-0 right-0 bg-[#003944] text-center py-4 text-[14.5px] font-sans z-30">
+          {/* Footer positioned fixed bottom to span edge-to-edge cleanly with no bottom/side spaces */}
+          <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[420px] bg-[#003944] text-center py-4 text-[14.5px] font-sans z-30 border-t border-white/5">
             <span className="text-[#fff685]">Concept by :</span>{" "}
             <span className="font-bold text-white uppercase tracking-wider mx-1">D&G Technostep</span>{" "}
             <span className="text-[#fff685]">- Surat</span>

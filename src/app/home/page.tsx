@@ -12,7 +12,6 @@ import FooterSponsors from "@/components/FooterSponsors";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import Footer from "@/components/Footer";
-import Image from "next/image";
 import { getCookie } from "@/lib/cookies";
 
 const HomeContent = () => {
@@ -95,8 +94,8 @@ const HomeContent = () => {
 
   return (
     <>
-      <div className="h-[100dvh] bg-[#d9d9d9] flex flex-col items-center justify-center overflow-hidden">
-        <div className="w-full max-w-[420px] h-full bg-[#f8f9fa] relative px-5 pt-6 shadow-2xl overflow-hidden border border-gray-200 flex flex-col">
+      <div className="min-h-[100dvh] bg-[#d9d9d9] flex flex-col items-center justify-center overflow-hidden">
+        <div className="w-full max-w-[420px] h-[100dvh] bg-[#f8f9fa] relative px-5 pt-6 shadow-2xl overflow-y-auto border border-gray-200 flex flex-col pb-[85px] scrollbar-none">
 
           {/* Restriction Modal */}
           {showRestriction && (
@@ -154,12 +153,10 @@ const HomeContent = () => {
               {/* View Counter */}
               <div className="flex items-center mt-2.5 w-fit">
                 <div className="mr-2 flex items-center justify-center shrink-0">
-                  <Image
+                  <img
                     src="/images/eyes.png"
                     alt="Eye"
-                    width={31}
-                    height={31}
-                    className="object-contain"
+                    className="w-[31px] h-[31px] object-contain"
                   />
                 </div>
                 <div className="flex space-x-[6px] ml-0.5 items-center">
@@ -221,12 +218,10 @@ const HomeContent = () => {
                 className="flex flex-col items-center cursor-pointer group"
               >
                 <div className="bg-[#dbdbdb] rounded-[18px] w-[70px] h-[70px] flex justify-center items-center shadow-sm group-hover:bg-[#d0d0d0] transition-all overflow-hidden relative">
-                  <Image
+                  <img
                     src={item.img}
                     alt={item.label}
-                    width={100}
-                    height={100}
-                    className="object-contain max-w-none scale-[1.4] transition-transform duration-200 group-hover:scale-[1.48]"
+                    className="w-[100px] h-[100px] max-w-none scale-[1.4] transition-transform duration-200 group-hover:scale-[1.48]"
                   />
                 </div>
 
