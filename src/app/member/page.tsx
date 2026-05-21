@@ -74,9 +74,9 @@ const MemberContent: FC = () => {
   }, [searchTerm, urlCategory, urlArea])
 
   return (
-    <div className="h-screen bg-[#d9d9d9] flex justify-center items-start">
+    <div className="min-h-[100dvh] bg-[#d9d9d9] flex flex-col items-center justify-center overflow-hidden">
 
-      <div className="w-[420px] h-full bg-[#eeeeee] relative px-5 pt-5 shadow-md flex flex-col">
+      <div className="w-full max-w-[420px] h-[100dvh] bg-[#eeeeee] relative px-5 pt-5 shadow-2xl flex flex-col overflow-hidden pb-[75px] border border-gray-200">
 
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
@@ -113,7 +113,7 @@ const MemberContent: FC = () => {
         </div>
 
         {/* Scroll Area */}
-        <div className="flex-1 overflow-y-auto pr-1 no-scrollbar pb-20">
+        <div className="flex-1 overflow-y-auto pr-1 no-scrollbar pb-4">
 
           {members.map((member) => (
             <div key={member.id} className="mb-4 border border-gray-300 bg-white">

@@ -58,8 +58,8 @@ const Associated: FC = () => {
   }, [])
 
   return (
-    <div className="h-screen bg-[#d9d9d9] flex justify-center">
-      <div className="w-[420px] h-full bg-[#eeeeee] relative px-5 pt-5 shadow-md flex flex-col">
+    <div className="min-h-[100dvh] bg-[#d9d9d9] flex flex-col items-center justify-center overflow-hidden">
+      <div className="w-full max-w-[420px] h-[100dvh] bg-[#eeeeee] relative px-5 pt-5 shadow-2xl flex flex-col overflow-hidden pb-[75px] border border-gray-200">
 
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
@@ -84,7 +84,7 @@ const Associated: FC = () => {
         </div>
 
         {/* Grid */}
-        <div className="flex-1 overflow-y-auto no-scrollbar pb-20">
+        <div className="flex-1 overflow-y-auto no-scrollbar pb-4">
           <div className="grid grid-cols-3 gap-4 mt-10">
             {associations.map((item, index) => (
               <AssociationCard

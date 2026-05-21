@@ -57,7 +57,7 @@ const Login: FC = () => {
   return (
     <>
       <div className="min-h-[100dvh] bg-[#d9d9d9] flex flex-col items-center justify-center overflow-hidden">
-        <div className="w-full max-w-[420px] h-[100dvh] bg-[#f8f9fa] relative px-5 pt-6 shadow-2xl border border-gray-200 flex flex-col overflow-y-auto pb-[65px] scrollbar-none">
+        <div className="w-full max-w-[420px] h-[100dvh] bg-[#f8f9fa] relative px-5 pt-6 shadow-2xl border border-gray-200 flex flex-col overflow-y-auto overflow-x-hidden pb-0 scrollbar-none">
           {/* Header */}
           <p className="text-start mt-2 text-[15.5px] text-gray-700 pr-[110px] italic leading-tight font-normal">
             Welcome to <span className="font-bold italic text-black">SEBA</span> Digital
@@ -79,11 +79,11 @@ const Login: FC = () => {
           </div>
 
           {/* Logo */}
-          <div className="flex justify-center mt-6">
-            <img src="/images/logo.png" alt="logo" className="w-[180px]" />
+          <div className="flex justify-center mt-3">
+            <img src="/images/logo.png" alt="logo" className="w-[140px]" />
           </div>
 
-          <p className="text-start ml-4 mt-5 text-[12.5px] italic text-gray-500 font-normal">
+          <p className="text-start ml-4 mt-3 text-[12.5px] italic text-gray-500 font-normal">
             One time registration -{" "}
             <span className="font-semibold not-italic text-black">SAFETY FIRST</span>
           </p>
@@ -91,7 +91,7 @@ const Login: FC = () => {
           {error && <p className="text-red-500 text-xs text-center mt-2 font-normal">{error}</p>}
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="mt-4 flex items-stretch relative">
+          <form onSubmit={handleSubmit} className="mt-3 flex items-stretch relative">
             <div className="flex-1 space-y-2 relative z-0">
               {/* Name */}
               <div className="flex items-center bg-white border border-gray-200 rounded-l-full overflow-hidden h-[45px]">
@@ -142,7 +142,7 @@ const Login: FC = () => {
           </form>
 
           {/* Middle Content */}
-          <div className="text-center mt-8">
+          <div className="text-center mt-4">
             <h2 className="text-[26px] leading-none text-gray-800">
               <span className="italic font-bold">SEBA</span>{" "}
               <span className="italic font-light text-gray-650">member's</span>
@@ -151,7 +151,7 @@ const Login: FC = () => {
           </div>
 
           {/* Bottom Section */}
-          <div className="mt-auto flex flex-col items-center pb-[60px]">
+          <div className="mt-auto flex flex-col items-center pt-4 pb-2">
             {/* Arrow */}
             <div className="flex justify-center mb-1">
               <svg width="32" height="20" viewBox="0 0 32 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -160,7 +160,7 @@ const Login: FC = () => {
             </div>
 
             {/* Info */}
-            <div className="text-center mb-4 text-[14px]">
+            <div className="text-center mb-2 text-[14px]">
               <p className="text-[#ef4444] font-semibold text-[17px] mb-0.5">
                 :: Powered by ::
               </p>
@@ -171,10 +171,10 @@ const Login: FC = () => {
             </div>
           </div>
 
-          {/* Footer positioned fixed bottom to span edge-to-edge cleanly with no bottom/side spaces */}
-          <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[420px] bg-[#003944] text-center py-4 text-[14.5px] font-sans z-30 border-t border-white/5">
+          {/* Footer in normal flow with negative margins to span edge-to-edge cleanly */}
+          <div className="bg-[#003944] text-center py-3 text-[14px] font-sans z-30 border-t border-white/5 -mx-5 mt-auto">
             <span className="text-[#fff685]">Concept by :</span>{" "}
-            <span className="font-bold text-white uppercase tracking-wider mx-1">D&G Technostep</span>{" "}
+            <span className="font-bold text-white uppercase tracking-wider mx-1">D&G TECHNOSTEP</span>{" "}
             <span className="text-[#fff685]">- Surat</span>
           </div>
         </div>

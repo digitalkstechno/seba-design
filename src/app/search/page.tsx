@@ -184,8 +184,8 @@ const Search = () => {
     });
 
     return (
-        <div className="h-screen bg-[#d9d9d9] flex justify-center items-start">
-            <div className="w-[420px] h-full bg-[#eeeeee] relative px-4 pt-4 shadow-md flex flex-col">
+        <div className="min-h-[100dvh] bg-[#d9d9d9] flex flex-col items-center justify-center overflow-hidden">
+            <div className="w-full max-w-[420px] h-[100dvh] bg-[#eeeeee] relative px-4 pt-4 shadow-2xl overflow-y-auto overflow-x-hidden flex flex-col pb-[75px] scrollbar-none border border-gray-200">
                 {/* Header */}
                 <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-2">
