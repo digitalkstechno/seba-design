@@ -183,19 +183,29 @@ const HomeContent = () => {
           {/* Floating Social Media Tabs - EXACT MATCH (Pixel-perfect, compact, and slightly smaller) */}
           <div className="absolute right-[-15px] top-[180px] flex flex-col items-end gap-3 z-40">
             {/* facebook */}
-            <div className="relative flex items-center bg-[#1877f2] hover:bg-[#166fe5] h-[28px] pl-[32px] pr-4 rounded-l-full shadow-md transform -rotate-[12deg] origin-right transition-transform hover:-translate-x-1 cursor-pointer">
+            <a 
+              href="https://www.facebook.com/people/SEBA-SURAT/61579436992759/#"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="relative flex items-center bg-[#1877f2] hover:bg-[#166fe5] h-[28px] pl-[32px] pr-4 rounded-l-full shadow-md transform -rotate-[12deg] origin-right transition-transform hover:-translate-x-1 cursor-pointer"
+            >
               <div className="absolute left-[-2px] top-1/2 -translate-y-1/2 bg-white rounded-full w-[30px] h-[30px] flex items-center justify-center shadow-sm border border-gray-100/50">
                 <FaFacebookF className="text-[#1877f2] text-[14px]" />
               </div>
               <span className="text-[11.5px] font-bold italic text-white font-sans tracking-wide">facebook</span>
-            </div>
+            </a>
             {/* instagram */}
-            <div className="relative flex items-center bg-gradient-to-r from-[#f09433] via-[#e6683c] to-[#bc1888] h-[28px] pl-[32px] pr-4 rounded-l-full shadow-md transform -rotate-[12deg] origin-right transition-transform hover:-translate-x-1 cursor-pointer">
+            <a 
+              href="https://www.instagram.com/seba_surat?igsh=ZnFvMm11bGhyOHZi"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="relative flex items-center bg-gradient-to-r from-[#f09433] via-[#e6683c] to-[#bc1888] h-[28px] pl-[32px] pr-4 rounded-l-full shadow-md transform -rotate-[12deg] origin-right transition-transform hover:-translate-x-1 cursor-pointer"
+            >
               <div className="absolute left-[-2px] top-1/2 -translate-y-1/2 bg-white rounded-full w-[30px] h-[30px] flex items-center justify-center shadow-sm border border-gray-100/50">
                 <FaInstagram className="text-[#e1306c] text-[15px]" />
               </div>
               <span className="text-[11.5px] font-bold italic text-white font-sans tracking-wide">instagram</span>
-            </div>
+            </a>
             {/* events */}
             <div className="relative flex items-center bg-[#00a859] hover:bg-[#009650] h-[28px] pl-[32px] pr-4 rounded-l-full shadow-md transform -rotate-[12deg] origin-right transition-transform hover:-translate-x-1 cursor-pointer">
               <div className="absolute left-[-2px] top-1/2 -translate-y-1/2 bg-black rounded-full w-[30px] h-[30px] flex items-center justify-center shadow-sm border border-yellow-500/25">
@@ -217,15 +227,15 @@ const HomeContent = () => {
                 onClick={() => handleMenuClick(item)}
                 className="flex flex-col items-center cursor-pointer group"
               >
-                <div className="bg-[#dbdbdb] rounded-[18px] w-[70px] h-[70px] flex justify-center items-center shadow-sm group-hover:bg-[#d0d0d0] transition-all overflow-hidden relative">
+                <div className="bg-[#dbdbdb] rounded-[18px] w-[60px] h-[60px] flex justify-center items-center shadow-sm group-hover:bg-[#d0d0d0] transition-all overflow-hidden relative">
                   <img
                     src={item.img}
                     alt={item.label}
-                    className="w-[100px] h-[100px] max-w-none scale-[1.4] transition-transform duration-200 group-hover:scale-[1.48]"
+                    className="w-[90px] h-[90px] max-w-none scale-[1.2] transition-transform duration-200 group-hover:scale-[1.48]"
                   />
                 </div>
 
-                <p className="text-[12px] mt-2.5 italic text-gray-800 text-center leading-tight">
+                <p className="text-[11px] mt-2.5 italic text-gray-800 text-center leading-tight">
                   {item.label}
                 </p>
               </div>
@@ -233,7 +243,7 @@ const HomeContent = () => {
           </div>
 
           {/* Tagline */}
-          <p className="text-center mt-6 text-[19px] font-georgia italic font-bold text-[#1a1a1a] tracking-wide">
+          <p className="text-center mt-6 text-[16px] font-georgia italic text-[#1a1a1a] tracking-wide">
             Your Digital Partner to Grow
           </p>
 

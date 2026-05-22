@@ -85,65 +85,30 @@ const FooterSponsors = ({ type }: { type?: 'sponsor' | 'co-sponsor' }) => {
   };
 
   return (
-    <div className={`mt-auto px-4 pb-2`}>
+    <div className="mt-auto pb-2">
       <p className="text-center text-[12px] text-gray-800 font-bold italic mb-2 tracking-tight">
         :: {isCoSponsor ? "Co-Sponsored by" : label} ::
       </p>
       
-      <div className="relative w-full">
-        {/* Previous Arrow */}
-        {activeSponsors.length > 1 && (
-          <button 
-            onClick={handlePrev} 
-            className="absolute -left-3 sm:-left-4 top-1/2 -translate-y-1/2 text-red-600 hover:text-red-700 transition-colors cursor-pointer z-10"
-            aria-label="Previous Sponsor"
-          >
-            <svg width="12" height="50" viewBox="0 0 24 60" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="18 10 6 30 18 50"></polyline>
-            </svg>
-          </button>
-        )}
-
-        {/* Sponsor Image Box */}
-        <div 
-          className={`rounded-2xl shadow-xl flex justify-center overflow-hidden border w-full ${
-            isCoSponsor 
-              ? "bg-white/90 border-[#d4b958] h-[140px]" 
-              : "bg-white/80 border-[#0b4b4b] h-[120px]"
-          }`}
-        >
-          <img
-            key={activeSponsor._id || safeIndex}
-            src={`${process.env.NEXT_PUBLIC_IMAGE_URL}/builder/${activeSponsor.image}`}
-            alt={label}
-            className={`h-full w-full object-cover ${activeSponsor.adImage ? 'cursor-pointer' : ''}`}
-            onClick={() => {
-              if (activeSponsor.adImage) {
-                setSelectedAd({ image: activeSponsor.adImage, cardId: activeSponsor.cardId });
-              }
-            }}
-            style={{ animation: "fadeIn 0.5s ease-in-out" }}
-          />
-          <style jsx>{`
-            @keyframes fadeIn {
-              from { opacity: 0.8; }
-              to { opacity: 1; }
+      <div className="relative w-full flex justify-center items-center overflow-hidden">
+        <img
+          key={activeSponsor._id || safeIndex}
+          src={`${process.env.NEXT_PUBLIC_IMAGE_URL}/builder/${activeSponsor.image}`}
+          alt={label}
+          className={`w-full h-auto ${activeSponsor.adImage ? 'cursor-pointer' : ''}`}
+          onClick={() => {
+            if (activeSponsor.adImage) {
+              setSelectedAd({ image: activeSponsor.adImage, cardId: activeSponsor.cardId });
             }
-          `}</style>
-        </div>
-
-        {/* Next Arrow */}
-        {activeSponsors.length > 1 && (
-          <button 
-            onClick={handleNext} 
-            className="absolute -right-3 sm:-right-4 top-1/2 -translate-y-1/2 text-red-600 hover:text-red-700 transition-colors cursor-pointer z-10"
-            aria-label="Next Sponsor"
-          >
-            <svg width="12" height="50" viewBox="0 0 24 60" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="6 10 18 30 6 50"></polyline>
-            </svg>
-          </button>
-        )}
+          }}
+          style={{ animation: "fadeIn 0.5s ease-in-out" }}
+        />
+        <style jsx>{`
+          @keyframes fadeIn {
+            from { opacity: 0.8; }
+            to { opacity: 1; }
+          }
+        `}</style>
       </div>
 
       {/* Ad Modal */}

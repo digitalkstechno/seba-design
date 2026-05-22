@@ -174,10 +174,12 @@ const Search = () => {
     const coSponsor = sponsors.find(s => s.type === 'co-sponsor');
 
     const combinedOptions: any[] = [];
-    categories.forEach(cat => {
+    const sortedCategories = [...categories].sort((a: any, b: any) => a.name.localeCompare(b.name));
+    sortedCategories.forEach(cat => {
         combinedOptions.push({ name: cat.name });
         if (Array.isArray(cat.subCategories)) {
-            cat.subCategories.forEach((sub: string) => {
+            const sortedSubCats = [...cat.subCategories].sort((a: string, b: string) => a.localeCompare(b));
+            sortedSubCats.forEach((sub: string) => {
                 combinedOptions.push({ name: sub, isSub: true, parentCategory: cat.name });
             });
         }
