@@ -145,7 +145,7 @@ const ResultsContent: FC = () => {
         </div>
 
         {/* List */}
-        <div className="flex-1 overflow-y-auto px-1 py-2 space-y-3 no-scrollbar pb-4">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden px-1 py-2 space-y-3 no-scrollbar pb-4">
           {loading ? (
              <div className="flex justify-center py-10"><p className="text-gray-400 italic">Searching members...</p></div>
           ) : members.length === 0 ? (
@@ -156,7 +156,7 @@ const ResultsContent: FC = () => {
             return (
               <div key={member.id} className="flex items-center relative pr-2">
                 {/* Profile */}
-                <div className="w-[70px] h-[70px] rounded-full border-[1.5px] border-[#00a9e0] overflow-hidden p-[1px] bg-[#eeeeee] shrink-0 z-10 shadow-sm relative">
+                <div className="w-[16vw] h-[16vw] sm:w-[70px] sm:h-[70px] rounded-full border-[1.5px] border-[#00a9e0] overflow-hidden p-[1px] bg-[#eeeeee] shrink-0 z-10 shadow-sm relative">
                   <img
                     src={member.image}
                     alt={member.name}
@@ -174,21 +174,21 @@ const ResultsContent: FC = () => {
                       window.location.href = `${process.env.NEXT_PUBLIC_CARD_URL}/${member.cardId}?view=home`;
                     }
                   }}
-                  className={`bg-white rounded-r-[10px] rounded-l-[5px] flex items-center shadow-sm border border-gray-100 h-[70px] flex-1 ml-[-35px] pl-[45px] pr-2 overflow-hidden ${isNfcActive ? "cursor-pointer mr-3" : "cursor-default"}`}
+                  className={`bg-white rounded-r-[10px] rounded-l-[5px] flex items-center shadow-sm border border-gray-100 h-[16vw] sm:h-[70px] flex-1 ml-[-8vw] sm:ml-[-35px] pl-[10vw] sm:pl-[45px] pr-2 overflow-hidden ${isNfcActive ? "cursor-pointer mr-3" : "cursor-default"}`}
                 >
                   {/* Content */}
                   <div className="flex-1 min-w-0 flex flex-col justify-center">
                     <div className="border-b-[1.5px] border-[#00a9e0] pb-[1px] mb-[1px]">
-                      <p className="font-bold text-[12px] truncate uppercase leading-tight text-black pr-8">
+                      <p className="font-bold text-[3vw] sm:text-[12px] truncate uppercase leading-tight text-black pr-8">
                         {member.name}
                       </p>
                     </div>
                     <div className="border-b-[1.5px] border-[#00a9e0] py-[1px]">
-                      <p className="text-[11px] font-bold truncate uppercase text-gray-800 leading-tight pr-8">
+                      <p className="text-[2.8vw] sm:text-[11px] font-bold truncate uppercase text-gray-800 leading-tight pr-8">
                         {member.company}
                       </p>
                     </div>
-                    <p className="text-[11px] font-semibold truncate text-gray-500 mt-[2px] italic leading-tight pr-8">
+                    <p className="text-[2.8vw] sm:text-[11px] font-semibold truncate text-gray-500 mt-[2px] italic leading-tight pr-8">
                       {[member.address, member.area, member.city, member.state, member.pincode].filter(Boolean).join(', ')}
                     </p>
                   </div>
@@ -207,7 +207,7 @@ const ResultsContent: FC = () => {
                     }}
                     src="/images/arrow-01.png"
                     alt="NFC Card"
-                    className="absolute -right-[14px] top-1/2 -translate-y-1/2 z-10 w-[50px] h-[50px] object-contain cursor-pointer active:scale-95 transition-transform"
+                    className="absolute -right-[3vw] sm:-right-[14px] top-1/2 -translate-y-1/2 z-10 w-[11vw] h-[11vw] sm:w-[50px] sm:h-[50px] object-contain cursor-pointer active:scale-95 transition-transform"
                   />
                 )}
               </div>

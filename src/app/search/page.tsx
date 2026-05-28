@@ -45,17 +45,11 @@ const Search = () => {
             setDragX(newX);
         };
 
-        const handleMouseMove = (e: MouseEvent) => {
+        const handlePointerMove = (e: PointerEvent) => {
             handleMove(e.clientX);
         };
 
-        const handleTouchMove = (e: TouchEvent) => {
-            if (e.touches.length > 0) {
-                handleMove(e.touches[0].clientX);
-            }
-        };
-
-        const handleUp = () => {
+        const handlePointerUp = () => {
             setIsDragging(false);
             if (dragStartRef.current) {
                 const { hasMoved } = dragStartRef.current;
@@ -73,16 +67,12 @@ const Search = () => {
             }
         };
 
-        window.addEventListener("mousemove", handleMouseMove);
-        window.addEventListener("mouseup", handleUp);
-        window.addEventListener("touchmove", handleTouchMove, { passive: true });
-        window.addEventListener("touchend", handleUp);
+        window.addEventListener("pointermove", handlePointerMove);
+        window.addEventListener("pointerup", handlePointerUp);
 
         return () => {
-            window.removeEventListener("mousemove", handleMouseMove);
-            window.removeEventListener("mouseup", handleUp);
-            window.removeEventListener("touchmove", handleTouchMove);
-            window.removeEventListener("touchend", handleUp);
+            window.removeEventListener("pointermove", handlePointerMove);
+            window.removeEventListener("pointerup", handlePointerUp);
         };
     }, [isDragging, isOn, dragX]);
 
@@ -162,13 +152,9 @@ const Search = () => {
         setIsDragging(true);
     };
 
-    const onMouseDown = (e: React.MouseEvent) => {
+    const onPointerDown = (e: React.PointerEvent) => {
         e.preventDefault();
         handleStartDrag(e.clientX);
-    };
-
-    const onTouchStart = (e: React.TouchEvent) => {
-        handleStartDrag(e.touches[0].clientX);
     };
 
     const coSponsor = sponsors.find(s => s.type === 'co-sponsor');
@@ -275,9 +261,8 @@ const Search = () => {
                 {/* Radio button */}
                 <div className="flex justify-center mt-5">
                     <div
-                        onMouseDown={onMouseDown}
-                        onTouchStart={onTouchStart}
-                        className="relative w-[180px] h-[58px] rounded-full p-[3px] cursor-pointer flex items-center transition-all duration-300 select-none"
+                        onPointerDown={onPointerDown}
+                        className="relative w-[180px] h-[58px] rounded-full p-[3px] cursor-pointer flex items-center transition-all duration-300 select-none touch-none"
                     >
                         <div
                             className="absolute inset-[4px] rounded-full overflow-hidden"
@@ -298,7 +283,7 @@ const Search = () => {
                             />
                         </div>
                         <div
-                            className="absolute h-[46px] w-[90px] rounded-full flex items-center px-[5px]"
+                            className="absolute h-[46px] w-[90px] rounded-full flex items-center px-[5px] touch-none"
                             style={{
                                 transform: dragX !== null ? `translateX(${dragX}px)` : (isOn ? "translateX(87px)" : "translateX(2px)"),
                                 transition: dragX !== null ? "none" : "all 0.5s ease",
@@ -310,7 +295,7 @@ const Search = () => {
                             }}
                         >
                             <div
-                                className="w-[46px] h-[36px] rounded-full"
+                                className="w-[46px] h-[36px] rounded-full touch-none"
                                 style={{
                                     background: "radial-gradient(circle at 30% 30%, #ffffff, #d4d4d4)",
                                     boxShadow: "0 2px 4px rgba(0,0,0,0.2), inset -1px -1px 3px rgba(0,0,0,0.1)",
@@ -321,7 +306,7 @@ const Search = () => {
                         </div>
                         {/* Text ON / OFF */}
                         <span
-                            className="absolute font-bold text-xl select-none text-white"
+                            className="absolute font-bold text-xl select-none text-white touch-none"
                             style={{
                                 zIndex: 5,
                                 left: dragX !== null ? `${25 + (1 - (dragX - 2) / 85) * 90}px` : (isOn ? "25px" : "115px"),
