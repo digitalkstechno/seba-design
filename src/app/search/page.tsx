@@ -197,10 +197,10 @@ const Search = () => {
                         </p>
                     </div>
                     {/* Profile */}
-                    <div className="absolute right-[-14px] top-[-14px] z-20">
+                    <div className="absolute right-[10px] top-[0px] z-20">
                         <img
                             src="/images/search_profile.png"
-                            className="w-[110px] h-[110px] object-contain"
+                            className="w-[90px] h-[90px] object-contain"
                             alt="profile"
                         />
                     </div>

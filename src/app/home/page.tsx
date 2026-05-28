@@ -227,11 +227,11 @@ const HomeContent = () => {
                 onClick={() => handleMenuClick(item)}
                 className="flex flex-col items-center cursor-pointer group"
               >
-                <div className="bg-[#dbdbdb] rounded-[18px] w-[60px] h-[60px] flex justify-center items-center shadow-sm group-hover:bg-[#d0d0d0] transition-all overflow-hidden relative">
+                <div className="bg-[#dbdbdb] rounded-[10px] w-[55px] h-[55px] flex justify-center items-center shadow-sm group-hover:bg-[#d0d0d0] transition-all overflow-hidden relative">
                   <img
                     src={item.img}
                     alt={item.label}
-                    className="w-[90px] h-[90px] max-w-none scale-[1.2] transition-transform duration-200 group-hover:scale-[1.48]"
+                    className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-110"
                   />
                 </div>
 
