@@ -58,8 +58,8 @@ const Associated: FC = () => {
   }, [])
 
   return (
-    <div className="min-h-[100dvh] bg-[#d9d9d9] flex flex-col items-center justify-center overflow-hidden">
-      <div className="w-full max-w-[420px] h-[100dvh] bg-[#eeeeee] relative px-5 pt-5 shadow-2xl flex flex-col overflow-hidden pb-[75px] border border-gray-200">
+    <div className="min-h-[100vh] bg-[#d9d9d9] flex flex-col items-center justify-center overflow-hidden">
+      <div className="w-full max-w-[420px] h-[100vh] bg-[#eeeeee] relative px-5 pt-5 shadow-2xl flex flex-col overflow-hidden pb-[75px] border border-gray-200">
 
         {/* Header */}
         <div className="flex items-center justify-between mb-4">

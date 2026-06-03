@@ -124,8 +124,8 @@ const Login: FC = () => {
           font-size: min(3.75vw, 15px) !important;
         }
       `}</style>
-      <div className="min-h-[100dvh] bg-[#d9d9d9] flex flex-col items-center justify-center overflow-hidden">
-        <div className="w-full max-w-[420px] h-[100dvh] bg-[#f8f9fa] relative px-5 pt-6 shadow-2xl border border-gray-200 flex flex-col overflow-y-auto overflow-x-hidden pb-0 scrollbar-none auth-card">
+      <div className="min-h-[100vh] bg-[#d9d9d9] flex flex-col items-center justify-center overflow-hidden">
+        <div className="w-full max-w-[420px] h-[100vh] bg-[#f8f9fa] relative px-5 pt-6 shadow-2xl border border-gray-200 flex flex-col overflow-y-auto overflow-x-hidden pb-0 scrollbar-none auth-card">
           {/* Header */}
           <p className="text-start mt-2 text-[15.5px] text-gray-700 pr-[110px] italic leading-tight font-normal auth-header">
             Welcome to <span className="font-bold italic text-black">SEBA</span> Digital

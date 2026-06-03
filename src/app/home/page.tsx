@@ -94,8 +94,8 @@ const HomeContent = () => {
 
   return (
     <>
-      <div className="min-h-[100dvh] bg-[#d9d9d9] flex flex-col items-center justify-center overflow-hidden">
-        <div className="w-full max-w-[420px] h-[100dvh] bg-[#f8f9fa] relative px-5 pt-6 shadow-2xl overflow-y-auto overflow-x-hidden border border-gray-200 flex flex-col pb-[70px] scrollbar-none">
+      <div className="min-h-[100vh] bg-[#d9d9d9] flex flex-col items-center justify-center overflow-hidden">
+        <div className="w-full max-w-[420px] h-[100vh] bg-[#f8f9fa] relative px-5 pt-6 shadow-2xl overflow-y-auto overflow-x-hidden border border-gray-200 flex flex-col pb-[70px] scrollbar-none">
 
           {/* Restriction Modal */}
           {showRestriction && (
