@@ -25,6 +25,20 @@ type MemberType = {
   emailWebsite: string
 }
 
+const formatDateOfBirth = (dobStr?: string) => {
+  if (!dobStr || dobStr === "N/A") return "";
+  try {
+    const d = new Date(dobStr);
+    if (isNaN(d.getTime())) return dobStr;
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    return `${day}/${month}/${year}`;
+  } catch (e) {
+    return dobStr;
+  }
+};
+
 const MemberContent: FC = () => {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -54,7 +68,7 @@ const MemberContent: FC = () => {
         if (data.status === 'Success') {
           setMembers(data.data.map((item: any) => ({
             id: item.memberId,
-            name: item.position ? `${item.name} - ${item.position}` : item.name,
+            name: item.name,
             category: item.category,
             subCategory: item.subCategory,
             natureOfBusiness: item.natureOfBusiness,
@@ -62,12 +76,14 @@ const MemberContent: FC = () => {
             mobile: item.mobile,
             address: item.address,
             image: item.image ? `${process.env.NEXT_PUBLIC_IMAGE_URL}/builder/${item.image}` : "/images/member.webp",
-            dob: "N/A", // DOB not requested in backend but kept in type
+            dob: item.dob || "N/A",
             emailWebsite: item.emailWebsite
           })))
         }
-      } catch (err) {
-        console.error("Failed to fetch members", err)
+      } catch (err: any) {
+        console.error("Failed to fetch members", err);
+        deleteCookie("seba_token");
+        router.push("/home?restricted=true");
       }
     }
     fetchMembers()
@@ -120,8 +136,8 @@ const MemberContent: FC = () => {
 
               <div className="flex p-2 gap-2">
 
-                {/* Image + ID */}
-                <div className="w-[70px] text-center text-[11px]">
+                {/* Image + ID + DOB */}
+                <div className="w-[75px] text-center text-[11px] shrink-0">
                   <div className="w-[70px] h-[80px] bg-white flex items-center justify-center mx-auto overflow-hidden rounded-md border border-gray-200 shadow-sm">
                     <img
                       src={member.image}
@@ -129,7 +145,12 @@ const MemberContent: FC = () => {
                       className="w-full h-full object-cover"
                     />
                   </div>
-                  <p className="mt-1 font-medium">{member.id}</p>
+                  <p className="mt-1 font-semibold text-[10px] tracking-tight">{member.id}</p>
+                  {member.dob && member.dob !== "N/A" && (
+                    <p className="text-[9.5px] font-bold text-gray-700 mt-0.5 leading-tight">
+                      {formatDateOfBirth(member.dob)}
+                    </p>
+                  )}
                 </div>
 
                 {/* Details */}

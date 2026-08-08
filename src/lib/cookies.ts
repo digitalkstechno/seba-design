@@ -1,4 +1,4 @@
-export const setCookie = (name: string, value: string, hours = 24) => {
+export const setCookie = (name: string, value: string, hours = 24 * 30) => {
   if (typeof document === 'undefined') return;
   const expires = new Date(Date.now() + hours * 60 * 60 * 1000).toUTCString();
   document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/; SameSite=Lax`;

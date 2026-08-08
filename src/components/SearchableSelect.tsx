@@ -86,7 +86,7 @@ const SearchableSelect = ({
             />
           </div>
 
-          <div className="max-h-[200px] overflow-y-auto no-scrollbar py-1">
+          <div className="max-h-[360px] overflow-y-auto no-scrollbar py-1">
             {filteredOptions.length > 0 ? (
               filteredOptions.map((opt, idx) => (
                 <div

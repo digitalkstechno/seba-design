@@ -32,14 +32,14 @@ const Footer: FC = () => {
       </div>
 
       <div className="flex flex-col items-center cursor-pointer opacity-90 hover:opacity-100 transition-opacity">
-        <img src="/images/seba-link.png" alt="app link" className="w-[36px] h-[36px] object-contain my-[-4px]" />
+        <img src="/images/seba-link.png" alt="app link" className="w-[48px] h-[48px] object-contain my-[-8px]" />
         <span className="text-[12px] mt-1 font-medium tracking-wide">App Link</span>
       </div>
 
       <div
         className="flex flex-col items-center opacity-90 transition-opacity"
       >
-        <img src="/images/wolrd.png" alt="www.seba" className="w-[40px] h-[40px] object-contain my-[-6px]" />
+        <img src="/images/wolrd.png" alt="www.seba" className="w-[50px] h-[50px] object-contain my-[-10px]" />
         <span className="text-[12px] mt-1 font-medium tracking-wide">www.seba</span>
       </div>
 

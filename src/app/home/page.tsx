@@ -78,9 +78,30 @@ const HomeContent = () => {
 
   const [showRestriction, setShowRestriction] = useState(false);
 
-  const handleMenuClick = (item: any) => {
+  const handleMenuClick = async (item: any) => {
     if (item.label === "Members") {
-      const token = getCookie("seba_token");
+      let token = getCookie("seba_token");
+      
+      // If token is missing, attempt auto re-authentication using stored user mobile & name
+      if (!token) {
+        const mob = getCookie("seba_user_mobile");
+        const name = getCookie("seba_user_name");
+        if (mob) {
+          try {
+            const { data } = await api.post("/seba/user/login", { name, mobile: mob });
+            if (data.status === "Success" && data.data?.token) {
+              setCookie("seba_token", data.data.token);
+              deleteCookie("seba_user_is_inactive");
+              token = data.data.token;
+            }
+          } catch (err: any) {
+            if (err.response?.data?.message?.toLowerCase().includes("inactive")) {
+              setCookie("seba_user_is_inactive", "true");
+            }
+          }
+        }
+      }
+
       if (!token) {
         setShowRestriction(true);
         return;
@@ -122,9 +143,11 @@ const HomeContent = () => {
                   className="w-[125px] object-contain mb-5" 
                 />
 
-                {/* Only That Specific Text */}
-                <p className="text-[14.5px] font-bold text-gray-800 tracking-wide whitespace-nowrap">
-                  Only for the SEBA members
+                {/* Specific Restriction Text */}
+                <p className="text-[14.5px] font-bold text-gray-800 tracking-wide text-center">
+                  {typeof window !== 'undefined' && getCookie("seba_user_is_inactive") === "true"
+                    ? "You are an inactive member"
+                    : "Only for the SEBA members"}
                 </p>
               </div>
             </div>
@@ -207,7 +230,10 @@ const HomeContent = () => {
               <span className="text-[11.5px] font-bold italic text-white font-sans tracking-wide">instagram</span>
             </a>
             {/* events */}
-            <div className="relative flex items-center bg-[#00a859] hover:bg-[#009650] h-[28px] pl-[32px] pr-4 rounded-l-full shadow-md transform -rotate-[12deg] origin-right transition-transform hover:-translate-x-1 cursor-pointer">
+            <div 
+              onClick={() => router.push('/events')}
+              className="relative flex items-center bg-[#00a859] hover:bg-[#009650] h-[28px] pl-[32px] pr-4 rounded-l-full shadow-md transform -rotate-[12deg] origin-right transition-transform hover:-translate-x-1 cursor-pointer"
+            >
               <div className="absolute left-[-2px] top-1/2 -translate-y-1/2 bg-black rounded-full w-[30px] h-[30px] flex items-center justify-center shadow-sm border border-yellow-500/25">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ffd700" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="scale-[1.05]">
                   <path d="M3 21h18" />

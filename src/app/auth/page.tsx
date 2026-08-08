@@ -14,11 +14,32 @@ const Login: FC = () => {
   const [mobile, setMobile] = useState(formatPhoneNumber(""));
 
   useEffect(() => {
-    const name = getCookie("seba_user_name");
-    const mob = getCookie("seba_user_mobile");
-    if (name && mob) {
-      router.replace("/home");
-    }
+    const checkExistingUser = async () => {
+      const name = getCookie("seba_user_name");
+      const mob = getCookie("seba_user_mobile");
+      const token = getCookie("seba_token");
+
+      if (name && mob) {
+        if (!token) {
+          try {
+            const cleanedMobile = cleanPhoneNumber(mob);
+            const response = await api.post("/seba/user/login", { name, mobile: cleanedMobile });
+            if (response.data.status === "Success") {
+              setCookie("seba_token", response.data.data.token);
+              deleteCookie("seba_user_is_inactive");
+            }
+          } catch (err: any) {
+            if (err.response?.data?.message?.toLowerCase().includes("inactive")) {
+              setCookie("seba_user_is_inactive", "true");
+            } else {
+              deleteCookie("seba_user_is_inactive");
+            }
+          }
+        }
+        router.replace("/home");
+      }
+    };
+    checkExistingUser();
   }, [router]);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -43,11 +64,16 @@ const Login: FC = () => {
       const response = await api.post("/seba/user/login", { name, mobile: cleanedMobile });
       if (response.data.status === "Success") {
         setCookie("seba_token", response.data.data.token);
+        deleteCookie("seba_user_is_inactive");
       }
     } catch (err: any) {
-      console.log("Not a member, proceeding as guest");
-      // Clear token if it exists from a previous login
+      console.log("Not an active member, proceeding as guest");
       deleteCookie("seba_token");
+      if (err.response?.data?.message?.toLowerCase().includes("inactive")) {
+        setCookie("seba_user_is_inactive", "true");
+      } else {
+        deleteCookie("seba_user_is_inactive");
+      }
     } finally {
       setLoading(false);
       router.push("/home");
@@ -122,6 +148,10 @@ const Login: FC = () => {
         }
         .auth-middle-sub {
           font-size: min(3.75vw, 15px) !important;
+        }
+        .auth-categories {
+          font-size: min(3.125vw, 12.5px) !important;
+          margin-top: min(2.5vw, 10px) !important;
         }
       `}</style>
       <div className="min-h-[100vh] bg-[#d9d9d9] flex flex-col items-center justify-center overflow-hidden">
@@ -216,6 +246,20 @@ const Login: FC = () => {
               <span className="italic font-light text-gray-650">member's</span>
             </h2>
             <p className="text-gray-400 text-[15px] mt-1.5 font-normal auth-middle-sub">Digital Version</p>
+
+            {/* Categories */}
+            <div className="mt-2.5 text-[12.5px] text-gray-700 font-normal leading-relaxed auth-categories">
+              <div>
+                Architects <span className="text-[#ef4444] font-medium px-0.5">|</span>{" "}
+                Builders <span className="text-[#ef4444] font-medium px-0.5">|</span>{" "}
+                Engineers <span className="text-[#ef4444] font-medium px-0.5">|</span>{" "}
+                Property Agents
+              </div>
+              <div className="mt-0.5">
+                Material Suppliers <span className="text-[#ef4444] font-medium px-0.5">|</span>{" "}
+                Manufacturers
+              </div>
+            </div>
           </div>
 
           {/* Bottom Section */}
