@@ -12,7 +12,8 @@ import FooterSponsors from "@/components/FooterSponsors";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import Footer from "@/components/Footer";
-import { getCookie } from "@/lib/cookies";
+import { getCookie, setCookie, deleteCookie } from "@/lib/cookies";
+import { cleanPhoneNumber } from "@/lib/phoneUtils";
 
 const HomeContent = () => {
   const router = useRouter();
@@ -88,7 +89,8 @@ const HomeContent = () => {
         const name = getCookie("seba_user_name");
         if (mob) {
           try {
-            const { data } = await api.post("/seba/user/login", { name, mobile: mob });
+            const cleanMob = cleanPhoneNumber(mob);
+            const { data } = await api.post("/seba/user/login", { name: name || "", mobile: cleanMob });
             if (data.status === "Success" && data.data?.token) {
               setCookie("seba_token", data.data.token);
               deleteCookie("seba_user_is_inactive");

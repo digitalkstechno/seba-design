@@ -90,6 +90,7 @@ const ResultsContent: FC = () => {
             id: item.memberId,
             name: item.name,
             company: item.company,
+            isCompany: Boolean(item.isCompany),
             category: item.category,
             subCategory: item.subCategory,
             natureOfBusiness: item.natureOfBusiness,
@@ -99,14 +100,26 @@ const ResultsContent: FC = () => {
             state: item.state,
             pincode: item.pincode,
             image: item.image ? `${process.env.NEXT_PUBLIC_IMAGE_URL}/builder/${item.image}` : "/images/member.webp",
-            hasNfcCard: item.hasNfcCard,
+            hasNfcCard: Boolean(item.hasNfcCard),
+            isSponsorNfc: Boolean(item.isSponsorNfc),
             cardId: item.cardId,
             status: item.status
           })).sort((a: any, b: any) => {
-            if (a.hasNfcCard === b.hasNfcCard) {
-              return a.name.localeCompare(b.name);
+            const getSortRank = (m: any) => {
+              const isComp = Boolean(m.isCompany);
+              const hasNfc = Boolean(m.hasNfcCard || m.isSponsorNfc);
+              if (isComp && hasNfc) return 1;    // 1: Company WITH NFC
+              if (!isComp && hasNfc) return 2;   // 2: Member WITH NFC
+              if (isComp && !hasNfc) return 3;   // 3: Company WITHOUT NFC
+              return 4;                          // 4: Member WITHOUT NFC
+            };
+
+            const rankA = getSortRank(a);
+            const rankB = getSortRank(b);
+            if (rankA !== rankB) {
+              return rankA - rankB;
             }
-            return a.hasNfcCard ? -1 : 1;
+            return (a.name || "").localeCompare(b.name || "");
           }))
         }
       } catch (err) {
@@ -120,15 +133,15 @@ const ResultsContent: FC = () => {
 
   return (
     <div className="min-h-[100vh] bg-[#d9d9d9] flex flex-col items-center justify-center overflow-hidden">
-      <div className="w-[100vw] h-[100vh] bg-[#eeeeee] px-[5vw] pt-[5vw] shadow-2xl flex flex-col relative overflow-hidden pb-[18vw] border border-gray-200">
+      <div className="w-full max-w-[420px] h-[100vh] bg-[#eeeeee] relative px-4 pt-4 shadow-2xl flex flex-col overflow-hidden pb-[75px] border border-gray-200">
 
         {/* Header */}
-        <div className="flex items-center gap-[2vw] mb-[4vw]">
+        <div className="flex items-center gap-2 mb-3">
           <IoIosArrowBack
             onClick={() => router.back()}
-            className="text-[6vw] cursor-pointer text-gray-800 hover:text-black transition-colors"
+            className="text-xl cursor-pointer text-gray-800 hover:text-black transition-colors"
           />
-          <p className="text-[4vw] font-black text-gray-800 uppercase tracking-tight ml-[1vw] truncate">
+          <p className="text-sm font-black text-gray-800 uppercase tracking-tight truncate">
             {urlCategory && urlCategory !== 'All Categories' ? (
               urlSubCategory ? `${urlCategory.toUpperCase()} - ${urlSubCategory.toUpperCase()}` : urlCategory.toUpperCase()
             ) : "SEBA MEMBERS"}
@@ -136,8 +149,8 @@ const ResultsContent: FC = () => {
         </div>
 
         {/* Info Banner */}
-        <div className="px-[1vw] mb-[3vw] flex justify-center">
-          <img 
+        <div className="px-1 mb-3 flex justify-center">
+          <img
             src="/images/text-01.png"
             alt="Alphabetically NFC card holder name come first"
             className="w-full h-auto object-contain"
@@ -145,80 +158,81 @@ const ResultsContent: FC = () => {
         </div>
 
         {/* List */}
-        <div className="flex-1 overflow-y-auto overflow-x-hidden px-[1vw] py-[2vw] space-y-[3vw] no-scrollbar pb-[4vw]">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden px-1 py-2 space-y-3 no-scrollbar pb-4">
           {loading ? (
-             <div className="flex justify-center py-[10vw]"><p className="text-gray-400 italic text-[3.5vw]">Searching members...</p></div>
+            <div className="flex justify-center py-10"><p className="text-gray-400 italic text-sm">Searching members...</p></div>
           ) : members.length === 0 ? (
-             <div className="flex justify-center py-[10vw]"><p className="text-gray-400 italic text-[3.5vw]">No members found in this area.</p></div>
+            <div className="flex justify-center py-10"><p className="text-gray-400 italic text-sm">No members found in this area.</p></div>
           ) : members.map((member) => {
-             const isNfcActive = member.hasNfcCard && member.cardId && member.status === 'active';
+            const isNfcActive = (member.hasNfcCard || member.isSponsorNfc) && member.status === 'active';
+            const isCompanyNfc = member.isCompany && isNfcActive;
 
-             return (
-               <div key={member.id} className="flex items-center relative pr-[2vw]">
-                 {/* Profile */}
-                 <div className="w-[16vw] h-[16vw] rounded-full border-[0.4vw] border-[#00a9e0] overflow-hidden p-[0.3vw] bg-[#eeeeee] shrink-0 z-10 shadow-sm relative">
-                   <img
-                     src={member.image}
-                     alt={member.name}
-                     className="w-full h-full rounded-full object-cover"
-                   />
-                 </div>
+            return (
+              <div key={member.id} className="flex items-center relative pr-2">
+                {/* Profile */}
+                <div className="w-[60px] h-[60px] rounded-full border-[2px] border-[#00a9e0] overflow-hidden p-[1px] bg-[#eeeeee] shrink-0 z-10 shadow-sm relative">
+                  <img
+                    src={member.image}
+                    alt={member.name}
+                    className="w-full h-full rounded-full object-cover"
+                  />
+                </div>
 
-                 {/* Card */}
-                 <div 
-                   onClick={() => {
-                     if (isNfcActive) {
-                       try {
-                         localStorage.setItem('seba:navigatedToCard', 'true');
-                       } catch (e) {}
-                       window.location.href = `${process.env.NEXT_PUBLIC_CARD_URL}/${member.cardId}?view=home`;
-                     }
-                   }}
-                   className={`bg-white rounded-r-[2.5vw] rounded-l-[1vw] flex items-center shadow-sm border border-gray-100 h-[16vw] flex-1 ml-[-8vw] pl-[10vw] pr-[2vw] overflow-hidden ${isNfcActive ? "cursor-pointer mr-[3vw]" : "cursor-default"}`}
-                 >
-                   {/* Content */}
-                   <div className="flex-1 min-w-0 flex flex-col justify-center">
-                     <div className="border-b-[0.3vw] border-[#00a9e0] pb-[0.3vw] mb-[0.3vw]">
-                       <p className="font-bold text-[3vw] truncate uppercase leading-tight text-black pr-[8vw]">
-                         {member.name}
-                       </p>
-                     </div>
-                     <div className="border-b-[0.3vw] border-[#00a9e0] py-[0.3vw]">
-                       <p className="text-[2.8vw] font-bold truncate uppercase text-gray-800 leading-tight pr-[8vw]">
-                         {member.company}
-                       </p>
-                     </div>
-                     <p className="text-[2.8vw] font-semibold truncate text-gray-500 mt-[0.5vw] italic leading-tight pr-[8vw]">
-                       {[member.address, member.area, member.city, member.state, member.pincode].filter(Boolean).join(', ')}
-                     </p>
-                   </div>
-                 </div>
+                {/* Card */}
+                <div
+                  onClick={() => {
+                    if (isNfcActive) {
+                      try {
+                        localStorage.setItem('seba:navigatedToCard', 'true');
+                      } catch (e) { }
+                      window.location.href = `${process.env.NEXT_PUBLIC_CARD_URL}/${member.cardId}?view=home`;
+                    }
+                  }}
+                  className={`bg-white rounded-r-xl rounded-l-md flex items-center shadow-sm border border-gray-100 min-h-[64px] flex-1 ml-[-30px] pl-[38px] pr-2 overflow-hidden ${isNfcActive ? "cursor-pointer mr-3" : "cursor-default"}`}
+                >
+                  {/* Content */}
+                  <div className="flex-1 min-w-0 flex flex-col justify-center py-1">
+                    <div className="border-b-[1.5px] border-[#00a9e0] pb-0.5 mb-0.5">
+                      <p className="font-bold text-[12px] truncate uppercase leading-tight text-black pr-6">
+                        {member.name}
+                      </p>
+                    </div>
+                    <div className="border-b-[1.5px] border-[#00a9e0] py-0.5">
+                      <p className="text-[11px] font-bold truncate uppercase text-gray-800 leading-tight pr-6">
+                        {member.company}
+                      </p>
+                    </div>
+                    <p className="text-[10px] font-semibold truncate text-gray-500 mt-0.5 italic leading-tight pr-6">
+                      {[member.address, member.area, member.city, member.state, member.pincode].filter(Boolean).join(', ')}
+                    </p>
+                  </div>
+                </div>
 
-                 {/* Detail Arrow - Only for active NFC Card holders */}
-                 {isNfcActive && (
-                   <img 
-                     onClick={() => {
-                       if (member.cardId) {
-                         try {
-                           localStorage.setItem('seba:navigatedToCard', 'true');
-                         } catch (e) {}
-                         window.location.href = `${process.env.NEXT_PUBLIC_CARD_URL}/${member.cardId}?view=home`;
-                       }
-                     }}
-                     src="/images/arrow-01.png"
-                     alt="NFC Card"
-                     className="absolute -right-[3vw] top-1/2 -translate-y-1/2 z-10 w-[11vw] h-[11vw] object-contain cursor-pointer active:scale-95 transition-transform"
-                   />
-                 )}
-               </div>
-             );
+                {/* Detail Arrow - Yellow Arrow for Company NFC, Red Arrow for Member NFC */}
+                {isNfcActive && (
+                  <img
+                    onClick={() => {
+                      if (member.cardId) {
+                        try {
+                          localStorage.setItem('seba:navigatedToCard', 'true');
+                        } catch (e) { }
+                        window.location.href = `${process.env.NEXT_PUBLIC_CARD_URL}/${member.cardId}?view=home`;
+                      }
+                    }}
+                    src={isCompanyNfc ? "/images/yellow-arrow.png" : "/images/arrow-01.png"}
+                    alt="NFC Card"
+                    className="absolute -right-3 top-1/2 -translate-y-1/2 z-10 w-10 h-10 object-contain cursor-pointer active:scale-95 transition-transform"
+                  />
+                )}
+              </div>
+            );
           })}
         </div>
 
         <Footer />
 
       </div>
-      
+
       <style jsx>{`
         .no-scrollbar::-webkit-scrollbar { display: none; }
       `}</style>

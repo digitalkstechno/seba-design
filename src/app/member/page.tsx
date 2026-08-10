@@ -8,7 +8,8 @@ import { BsGlobe, BsShare } from "react-icons/bs"
 import { IoIosArrowBack } from "react-icons/io"
 import { FaSearch } from "react-icons/fa"
 import Footer from "@/components/Footer"
-import { getCookie } from "@/lib/cookies"
+import { getCookie, setCookie, deleteCookie } from "@/lib/cookies"
+import { cleanPhoneNumber } from "@/lib/phoneUtils"
 
 // Types
 type MemberType = {
@@ -50,10 +51,33 @@ const MemberContent: FC = () => {
   const [searchTerm, setSearchTerm] = useState("")
 
   useEffect(() => {
-    const token = getCookie("seba_token");
-    if (!token) {
-      router.push("/home?restricted=true");
-    }
+    const checkAuth = async () => {
+      let token = getCookie("seba_token");
+      if (!token) {
+        const mob = getCookie("seba_user_mobile");
+        const name = getCookie("seba_user_name");
+        if (mob) {
+          try {
+            const cleanMob = cleanPhoneNumber(mob);
+            const { data } = await api.post("/seba/user/login", { name: name || "", mobile: cleanMob });
+            if (data.status === "Success" && data.data?.token) {
+              setCookie("seba_token", data.data.token);
+              deleteCookie("seba_user_is_inactive");
+              token = data.data.token;
+            }
+          } catch (err: any) {
+            if (err.response?.data?.message?.toLowerCase().includes("inactive")) {
+              setCookie("seba_user_is_inactive", "true");
+            }
+          }
+        }
+      }
+
+      if (!token) {
+        router.push("/home?restricted=true");
+      }
+    };
+    checkAuth();
   }, [router]);
 
   useEffect(() => {
@@ -73,17 +97,39 @@ const MemberContent: FC = () => {
             subCategory: item.subCategory,
             natureOfBusiness: item.natureOfBusiness,
             company: item.company,
+            isCompany: Boolean(item.isCompany),
+            hasNfcCard: Boolean(item.hasNfcCard),
+            isSponsorNfc: Boolean(item.isSponsorNfc),
+            cardId: item.cardId,
             mobile: item.mobile,
             address: item.address,
             image: item.image ? `${process.env.NEXT_PUBLIC_IMAGE_URL}/builder/${item.image}` : "/images/member.webp",
             dob: item.dob || "N/A",
             emailWebsite: item.emailWebsite
-          })))
+          })).sort((a: any, b: any) => {
+            const getSortRank = (m: any) => {
+              const isComp = Boolean(m.isCompany);
+              const hasNfc = Boolean(m.hasNfcCard || m.isSponsorNfc);
+              if (isComp && hasNfc) return 1;    // 1: Company WITH NFC
+              if (!isComp && hasNfc) return 2;   // 2: Member WITH NFC
+              if (isComp && !hasNfc) return 3;   // 3: Company WITHOUT NFC
+              return 4;                          // 4: Member WITHOUT NFC
+            };
+
+            const rankA = getSortRank(a);
+            const rankB = getSortRank(b);
+            if (rankA !== rankB) {
+              return rankA - rankB;
+            }
+            return (a.name || "").localeCompare(b.name || "");
+          }))
         }
       } catch (err: any) {
         console.error("Failed to fetch members", err);
-        deleteCookie("seba_token");
-        router.push("/home?restricted=true");
+        if (err.response?.status === 401 || err.response?.data?.message?.toLowerCase().includes("inactive")) {
+          deleteCookie("seba_token");
+          router.push("/home?restricted=true");
+        }
       }
     }
     fetchMembers()
@@ -134,7 +180,7 @@ const MemberContent: FC = () => {
           {members.map((member) => (
             <div key={member.id} className="mb-4 border border-gray-300 bg-white">
 
-              <div className="flex p-2 gap-2">
+              <div className="flex p-2 gap-2 relative">
 
                 {/* Image + ID + DOB */}
                 <div className="w-[75px] text-center text-[11px] shrink-0">
