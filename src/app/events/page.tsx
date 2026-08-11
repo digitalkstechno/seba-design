@@ -7,6 +7,9 @@ import { IoIosArrowBack } from "react-icons/io"
 import Footer from "@/components/Footer"
 import { FaChevronRight } from "react-icons/fa"
 
+import { getCookie, setCookie, deleteCookie } from "@/lib/cookies"
+import { cleanPhoneNumber } from "@/lib/phoneUtils"
+
 type EventType = {
   _id: string
   title: string
@@ -25,23 +28,65 @@ const EventsPage: FC = () => {
   const [submitting, setSubmitting] = useState(false)
   const [successMsg, setSuccessMsg] = useState("")
   const [errorMsg, setErrorMsg] = useState("")
+  const [authChecking, setAuthChecking] = useState(true)
+  const [isAuthorized, setIsAuthorized] = useState(false)
 
   useEffect(() => {
-    const fetchEvents = async () => {
-      setLoading(true)
+    const checkAuthAndFetch = async () => {
+      let token = getCookie("seba_token");
+      if (!token) {
+        const mob = getCookie("seba_user_mobile");
+        const name = getCookie("seba_user_name");
+        if (mob) {
+          try {
+            const cleanMob = cleanPhoneNumber(mob);
+            const { data } = await api.post("/seba/user/login", { name: name || "", mobile: cleanMob });
+            if (data.status === "Success" && data.data?.token) {
+              setCookie("seba_token", data.data.token);
+              deleteCookie("seba_user_is_inactive");
+              token = data.data.token;
+            }
+          } catch (err: any) {
+            if (err.response?.data?.message?.toLowerCase().includes("inactive")) {
+              setCookie("seba_user_is_inactive", "true");
+            }
+          }
+        }
+      }
+
+      if (!token) {
+        router.replace("/home?restricted=true");
+        return;
+      }
+
+      setIsAuthorized(true);
+      setAuthChecking(false);
+
+      setLoading(true);
       try {
-        const { data } = await api.get('/seba/event')
+        const { data } = await api.get('/seba/event');
         if (data.status === 'Success') {
-          setEvents(data.data)
+          setEvents(data.data);
         }
       } catch (err) {
-        console.error("Failed to fetch events", err)
+        console.error("Failed to fetch events", err);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
-    fetchEvents()
-  }, [])
+    };
+
+    checkAuthAndFetch();
+  }, [router]);
+
+  if (authChecking || !isAuthorized) {
+    return (
+      <div className="min-h-[100vh] bg-[#d9d9d9] flex flex-col items-center justify-center overflow-hidden">
+        <div className="w-full max-w-[420px] h-[100vh] bg-[#f8f9fa] relative px-4 pt-4 shadow-2xl flex flex-col items-center justify-center border border-gray-200">
+          <p className="text-gray-400 italic text-sm">Verifying membership...</p>
+        </div>
+      </div>
+    );
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -59,6 +104,12 @@ const EventsPage: FC = () => {
       const formData = new FormData()
       if (activeEventId) formData.append('eventId', activeEventId)
       formData.append('message', message.trim())
+
+      const mob = getCookie("seba_user_mobile")
+      const name = getCookie("seba_user_name")
+      if (mob) formData.append('userMobile', mob)
+      if (name) formData.append('userName', name)
+
       if (imageFile) formData.append('image', imageFile)
 
       const { data } = await api.post('/seba/event/message', formData, {
@@ -179,6 +230,30 @@ const EventsPage: FC = () => {
               onChange={(e) => setImageFile(e.target.files?.[0] || null)}
               className="w-full bg-white border border-gray-300 rounded-xl px-3 py-2 text-xs text-gray-700 focus:outline-none focus:ring-2 focus:ring-sky-500 shadow-sm"
             />
+
+            {imageFile && (
+              <div className="mt-2 flex items-center gap-3 p-2 bg-white border border-gray-300 rounded-xl shadow-xs">
+                <img
+                  src={URL.createObjectURL(imageFile)}
+                  alt="Selected Preview"
+                  className="w-14 h-14 object-cover rounded-lg border border-gray-200 shadow-xs"
+                />
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-semibold text-gray-800 truncate">{imageFile.name}</p>
+                  <p className="text-[10.5px] text-gray-500">{(imageFile.size / 1024).toFixed(1)} KB</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setImageFile(null);
+                    if (fileInputRef.current) fileInputRef.current.value = "";
+                  }}
+                  className="text-xs text-red-500 font-bold px-2 py-1 hover:bg-red-50 rounded-md cursor-pointer"
+                >
+                  Remove
+                </button>
+              </div>
+            )}
           </div>
 
           {errorMsg && (

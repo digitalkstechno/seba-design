@@ -79,35 +79,40 @@ const HomeContent = () => {
 
   const [showRestriction, setShowRestriction] = useState(false);
 
-  const handleMenuClick = async (item: any) => {
-    if (item.label === "Members") {
-      let token = getCookie("seba_token");
-      
-      // If token is missing, attempt auto re-authentication using stored user mobile & name
-      if (!token) {
-        const mob = getCookie("seba_user_mobile");
-        const name = getCookie("seba_user_name");
-        if (mob) {
-          try {
-            const cleanMob = cleanPhoneNumber(mob);
-            const { data } = await api.post("/seba/user/login", { name: name || "", mobile: cleanMob });
-            if (data.status === "Success" && data.data?.token) {
-              setCookie("seba_token", data.data.token);
-              deleteCookie("seba_user_is_inactive");
-              token = data.data.token;
-            }
-          } catch (err: any) {
-            if (err.response?.data?.message?.toLowerCase().includes("inactive")) {
-              setCookie("seba_user_is_inactive", "true");
-            }
+  const checkMemberAuthAndNavigate = async (path: string) => {
+    let token = getCookie("seba_token");
+    if (!token) {
+      const mob = getCookie("seba_user_mobile");
+      const name = getCookie("seba_user_name");
+      if (mob) {
+        try {
+          const cleanMob = cleanPhoneNumber(mob);
+          const { data } = await api.post("/seba/user/login", { name: name || "", mobile: cleanMob });
+          if (data.status === "Success" && data.data?.token) {
+            setCookie("seba_token", data.data.token);
+            deleteCookie("seba_user_is_inactive");
+            token = data.data.token;
+          }
+        } catch (err: any) {
+          if (err.response?.data?.message?.toLowerCase().includes("inactive")) {
+            setCookie("seba_user_is_inactive", "true");
           }
         }
       }
+    }
 
-      if (!token) {
-        setShowRestriction(true);
-        return;
-      }
+    if (!token) {
+      setShowRestriction(true);
+      return;
+    }
+
+    router.push(path);
+  };
+
+  const handleMenuClick = async (item: any) => {
+    if (item.label === "Members" || item.label === "Events") {
+      await checkMemberAuthAndNavigate(item.path);
+      return;
     }
     router.push(item.path);
   };
@@ -128,7 +133,7 @@ const HomeContent = () => {
             >
               <div 
                 onClick={(e) => e.stopPropagation()} 
-                className="bg-white rounded-3xl p-8 shadow-2xl w-full max-w-[310px] animate-in zoom-in-95 duration-300 flex flex-col items-center text-center relative border border-gray-100"
+                className="bg-white rounded-3xl p-8 shadow-2xl w-full max-w-[320px] animate-in zoom-in-95 duration-300 flex flex-col items-center text-center relative border border-gray-100"
               >
                 {/* Close X */}
                 <button 
@@ -231,7 +236,7 @@ const HomeContent = () => {
             </a>
             {/* events */}
             <div 
-              onClick={() => router.push('/events')}
+              onClick={() => checkMemberAuthAndNavigate('/events')}
               className="relative flex items-center bg-[#00a859] hover:bg-[#009650] h-[28px] pl-[32px] pr-4 rounded-l-full shadow-md transform -rotate-[12deg] origin-right transition-transform hover:-translate-x-1 cursor-pointer"
             >
               <div className="absolute left-[-2px] top-1/2 -translate-y-1/2 bg-black rounded-full w-[30px] h-[30px] flex items-center justify-center shadow-sm border border-yellow-500/25">
