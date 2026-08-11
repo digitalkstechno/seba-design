@@ -79,7 +79,7 @@ const ResultsContent: FC = () => {
   useEffect(() => {
     const fetchMembers = async () => {
       try {
-        let query = `/seba/member?`
+        let query = `/seba/member?status=active&`
         if (urlCategory) query += `category=${encodeURIComponent(urlCategory)}&`
         if (urlSubCategory) query += `subCategory=${encodeURIComponent(urlSubCategory)}&`
         if (urlArea && urlArea !== "All Area") query += `area=${encodeURIComponent(urlArea)}`
@@ -101,13 +101,14 @@ const ResultsContent: FC = () => {
             pincode: item.pincode,
             image: item.image ? `${process.env.NEXT_PUBLIC_IMAGE_URL}/builder/${item.image}` : "/images/member.webp",
             hasNfcCard: Boolean(item.hasNfcCard),
+            nfcCardStatus: item.nfcCardStatus || 'active',
             isSponsorNfc: Boolean(item.isSponsorNfc),
             cardId: item.cardId,
             status: item.status
           })).sort((a: any, b: any) => {
             const getSortRank = (m: any) => {
               const isComp = Boolean(m.isCompany);
-              const hasNfc = Boolean(m.hasNfcCard || m.isSponsorNfc);
+              const hasNfc = Boolean((m.hasNfcCard || m.isSponsorNfc) && m.nfcCardStatus !== 'inactive');
               if (isComp && hasNfc) return 1;    // 1: Company WITH NFC
               if (!isComp && hasNfc) return 2;   // 2: Member WITH NFC
               if (isComp && !hasNfc) return 3;   // 3: Company WITHOUT NFC
@@ -125,27 +126,22 @@ const ResultsContent: FC = () => {
       } catch (err) {
         console.error("Failed to fetch members", err)
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
     }
     fetchMembers()
-  }, [urlCategory, urlArea, refreshTrigger])
+  }, [urlCategory, urlSubCategory, urlArea, refreshTrigger])
 
   return (
     <div className="min-h-[100vh] bg-[#d9d9d9] flex flex-col items-center justify-center overflow-hidden">
       <div className="w-full max-w-[420px] h-[100vh] bg-[#eeeeee] relative px-4 pt-4 shadow-2xl flex flex-col overflow-hidden pb-[75px] border border-gray-200">
 
         {/* Header */}
-        <div className="flex items-center gap-2 mb-3">
-          <IoIosArrowBack
-            onClick={() => router.back()}
-            className="text-xl cursor-pointer text-gray-800 hover:text-black transition-colors"
-          />
-          <p className="text-sm font-black text-gray-800 uppercase tracking-tight truncate">
-            {urlCategory && urlCategory !== 'All Categories' ? (
-              urlSubCategory ? `${urlCategory.toUpperCase()} - ${urlSubCategory.toUpperCase()}` : urlCategory.toUpperCase()
-            ) : "SEBA MEMBERS"}
-          </p>
+        <div className="flex items-center gap-2 mb-3 cursor-pointer" onClick={() => router.push('/search')}>
+          <IoIosArrowBack className="text-gray-700 text-lg" />
+          <h1 className="text-base font-bold text-gray-900 tracking-wide uppercase">
+            SEBA MEMBERS
+          </h1>
         </div>
 
         {/* Info Banner */}
@@ -164,7 +160,7 @@ const ResultsContent: FC = () => {
           ) : members.length === 0 ? (
             <div className="flex justify-center py-10"><p className="text-gray-400 italic text-sm">No members found in this area.</p></div>
           ) : members.map((member) => {
-            const isNfcActive = (member.hasNfcCard || member.isSponsorNfc) && member.status === 'active';
+            const isNfcActive = (member.hasNfcCard || member.isSponsorNfc) && member.nfcCardStatus !== 'inactive';
             const isCompanyNfc = member.isCompany && isNfcActive;
 
             return (

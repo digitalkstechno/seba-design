@@ -86,7 +86,7 @@ const Search = () => {
                 }
 
                 // Fetch members for areas (areas are still dynamic based on existing members)
-                const memberRes = await api.get('/seba/member');
+                const memberRes = await api.get('/seba/member?status=active');
                 if (memberRes.data.status === 'Success') {
                     const ars = Array.from(new Set(memberRes.data.data.map((m: any) => m.area).filter(Boolean))) as string[];
                     setAreas(ars);

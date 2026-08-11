@@ -147,9 +147,7 @@ const HomeContent = () => {
 
                 {/* Specific Restriction Text */}
                 <p className="text-[14.5px] font-bold text-gray-800 tracking-wide text-center">
-                  {typeof window !== 'undefined' && getCookie("seba_user_is_inactive") === "true"
-                    ? "You are an inactive member"
-                    : "Only for the SEBA members"}
+                  You are an inactive member
                 </p>
               </div>
             </div>

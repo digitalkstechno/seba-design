@@ -35,7 +35,7 @@ const DropboxPage: FC = () => {
 
     const fetchSebaMembers = async () => {
       try {
-        const { data } = await api.get('/seba/member')
+        const { data } = await api.get('/seba/member?status=active')
         if (data.status === 'Success') {
           setMembers(data.data)
         }

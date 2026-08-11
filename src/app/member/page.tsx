@@ -83,7 +83,7 @@ const MemberContent: FC = () => {
   useEffect(() => {
     const fetchMembers = async () => {
       try {
-        let query = `/seba/member?search=${searchTerm}`
+        let query = `/seba/member?status=active&search=${searchTerm}`
         if (urlCategory) query += `&category=${encodeURIComponent(urlCategory)}`
         if (urlSubCategory) query += `&subCategory=${encodeURIComponent(urlSubCategory)}`
         if (urlArea) query += `&area=${encodeURIComponent(urlArea)}`
@@ -99,6 +99,7 @@ const MemberContent: FC = () => {
             company: item.company,
             isCompany: Boolean(item.isCompany),
             hasNfcCard: Boolean(item.hasNfcCard),
+            nfcCardStatus: item.nfcCardStatus,
             isSponsorNfc: Boolean(item.isSponsorNfc),
             cardId: item.cardId,
             mobile: item.mobile,
@@ -109,7 +110,7 @@ const MemberContent: FC = () => {
           })).sort((a: any, b: any) => {
             const getSortRank = (m: any) => {
               const isComp = Boolean(m.isCompany);
-              const hasNfc = Boolean(m.hasNfcCard || m.isSponsorNfc);
+              const hasNfc = Boolean((m.hasNfcCard || m.isSponsorNfc) && m.nfcCardStatus === 'active');
               if (isComp && hasNfc) return 1;    // 1: Company WITH NFC
               if (!isComp && hasNfc) return 2;   // 2: Member WITH NFC
               if (isComp && !hasNfc) return 3;   // 3: Company WITHOUT NFC
@@ -125,53 +126,48 @@ const MemberContent: FC = () => {
           }))
         }
       } catch (err: any) {
-        console.error("Failed to fetch members", err);
         if (err.response?.status === 401 || err.response?.data?.message?.toLowerCase().includes("inactive")) {
-          deleteCookie("seba_token");
-          router.push("/home?restricted=true");
+          setCookie("seba_user_is_inactive", "true");
         }
+      } finally {
+        setLoading(false);
       }
     }
     fetchMembers()
-  }, [searchTerm, urlCategory, urlArea])
+  }, [searchTerm, urlCategory, urlSubCategory, urlArea])
 
   return (
     <div className="min-h-[100vh] bg-[#d9d9d9] flex flex-col items-center justify-center overflow-hidden">
+      <div className="w-full max-w-[420px] h-[100vh] bg-[#eeeeee] relative px-4 pt-4 shadow-2xl overflow-y-auto overflow-x-hidden flex flex-col pb-[70px] scrollbar-none">
 
-      <div className="w-full max-w-[420px] h-[100vh] bg-[#eeeeee] relative px-5 pt-5 shadow-2xl flex flex-col overflow-hidden pb-[75px] border border-gray-200">
+        {/* Top bar */}
+        <div className="relative">
+          {/* Header */}
+          <div className="flex items-center gap-2 mb-2 cursor-pointer" onClick={() => router.push('/home')}>
+            <IoIosArrowBack className="text-gray-700 text-lg" />
+            <h1 className="text-base font-bold text-gray-900 tracking-wide uppercase">
+              SEBA MEMBERS
+            </h1>
+          </div>
 
-        {/* Header */}
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <IoIosArrowBack
-              onClick={() => router.push('/home')}
-              className="text-xl cursor-pointer"
-            />
+          {/* Subtitle */}
+          <div className="px-1 mb-2">
             <p className="text-[14px] italic">
               Welcome to <span className="font-semibold">SEBA</span> Members List
             </p>
           </div>
 
-          {/* Profile */}
-          <div className="absolute right-[10px] top-[0px] z-20">
-            <img
-              src="/images/member_profile.png"
-              alt="profile"
-              className="w-[90px] h-[90px] object-contain"
+          {/* Search */}
+          <div className="mt-2 mb-4 flex items-center bg-gray-200 rounded-full px-4 py-2 border border-gray-300">
+            <input
+              type="text"
+              placeholder="Search by Name / Surnames"
+              className="flex-1 bg-transparent outline-none text-sm"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
             />
+            <FaSearch className="text-gray-700" />
           </div>
-        </div>
-
-        {/* Search */}
-        <div className="mt-8 mb-4 flex items-center bg-gray-200 rounded-full px-4 py-2">
-          <input
-            type="text"
-            placeholder="Search by Name / Surnames"
-            className="flex-1 bg-transparent outline-none text-sm"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-          <FaSearch className="text-gray-700" />
         </div>
 
         {/* Scroll Area */}
@@ -226,7 +222,6 @@ const MemberContent: FC = () => {
         </div>
 
         <Footer />
-
       </div>
 
       <style jsx>{`
