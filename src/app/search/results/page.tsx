@@ -26,6 +26,9 @@ type Member = {
   hasNfcCard: boolean
   cardId: string | null
   status: string
+  isSponsorNfc?: boolean
+  nfcCardStatus?: string
+  isCompany?: boolean
 }
 
 const ResultsContent: FC = () => {

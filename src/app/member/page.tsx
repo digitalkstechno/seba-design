@@ -19,6 +19,11 @@ type MemberType = {
   subCategory?: string
   natureOfBusiness?: string
   company: string
+  isCompany?: boolean
+  hasNfcCard?: boolean
+  nfcCardStatus?: string
+  isSponsorNfc?: boolean
+  cardId?: string
   mobile: string
   address: string
   image: string
@@ -49,6 +54,7 @@ const MemberContent: FC = () => {
 
   const [members, setMembers] = useState<MemberType[]>([])
   const [searchTerm, setSearchTerm] = useState("")
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const checkAuth = async () => {
