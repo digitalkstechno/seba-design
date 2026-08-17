@@ -96,8 +96,19 @@ const MemberContent: FC = () => {
 
         const { data } = await api.get(query)
         if (data.status === 'Success') {
-          setMembers(data.data.map((item: any) => ({
-            id: item.memberId,
+          const getSebaNo = (item: any) => {
+            const rawSeba = (item.sebaNo || item.memberId || "").trim();
+            if (rawSeba && !/^[0-9a-fA-F]{24}$/.test(rawSeba)) {
+              return rawSeba;
+            }
+            return "";
+          };
+
+          const filtered = data.data.filter((item: any) => Boolean(getSebaNo(item)));
+
+          setMembers(filtered.map((item: any) => ({
+            id: item.memberId || item._id,
+            sebaNo: getSebaNo(item),
             name: item.name,
             category: item.category,
             subCategory: item.subCategory,
@@ -112,24 +123,7 @@ const MemberContent: FC = () => {
             address: item.address,
             image: item.image ? `${process.env.NEXT_PUBLIC_IMAGE_URL}/builder/${item.image}` : "/images/member.webp",
             dob: item.dob || "N/A",
-            emailWebsite: item.emailWebsite
-          })).sort((a: any, b: any) => {
-            const getSortRank = (m: any) => {
-              const isComp = Boolean(m.isCompany);
-              const hasNfc = Boolean((m.hasNfcCard || m.isSponsorNfc) && m.nfcCardStatus === 'active');
-              if (isComp && hasNfc) return 1;    // 1: Company WITH NFC
-              if (!isComp && hasNfc) return 2;   // 2: Member WITH NFC
-              if (isComp && !hasNfc) return 3;   // 3: Company WITHOUT NFC
-              return 4;                          // 4: Member WITHOUT NFC
-            };
-
-            const rankA = getSortRank(a);
-            const rankB = getSortRank(b);
-            if (rankA !== rankB) {
-              return rankA - rankB;
-            }
-            return (a.name || "").localeCompare(b.name || "");
-          }))
+          })).sort((a: any, b: any) => (a.name || "").trim().localeCompare((b.name || "").trim(), undefined, { sensitivity: 'base' })))
         }
       } catch (err: any) {
         if (err.response?.status === 401 || err.response?.data?.message?.toLowerCase().includes("inactive")) {
@@ -180,22 +174,22 @@ const MemberContent: FC = () => {
         <div className="flex-1 overflow-y-auto pr-1 no-scrollbar pb-4">
 
           {members.map((member) => (
-            <div key={member.id} className="mb-4 border border-gray-300 bg-white">
+            <div key={member.id} className="mb-2.5 border border-gray-300 bg-white">
 
               <div className="flex p-2 gap-2 relative">
 
                 {/* Image + ID + DOB */}
                 <div className="w-[75px] text-center text-[11px] shrink-0">
-                  <div className="w-[70px] h-[80px] bg-white flex items-center justify-center mx-auto overflow-hidden rounded-md border border-gray-200 shadow-sm">
+                  <div className="w-[80px] h-[80px] bg-white flex items-center justify-center mx-auto overflow-hidden rounded-full border border-gray-200 shadow-sm">
                     <img
                       src={member.image}
                       alt={member.name}
                       className="w-full h-full object-cover"
                     />
                   </div>
-                  <p className="mt-1 font-semibold text-[10px] tracking-tight">{member.id}</p>
+                  <p className="mt-1 font-semibold text-[10px] tracking-tight">{member.sebaNo ? member.sebaNo : "No SEBA No"}</p>
                   {member.dob && member.dob !== "N/A" && (
-                    <p className="text-[9.5px] font-bold text-gray-700 mt-0.5 leading-tight">
+                    <p className="text-[9.5px] font-bold text-gray-700 leading-tight">
                       {formatDateOfBirth(member.dob)}
                     </p>
                   )}
@@ -207,13 +201,17 @@ const MemberContent: FC = () => {
                     {member.name}
                   </p>
                   {member.category && (
-                    <p className="text-gray-500 font-bold text-[10.5px] mt-0.5 uppercase tracking-wider">
+                    <p className="text-gray-500 font-bold text-[10.5px] uppercase tracking-wider">
                       {member.category}
                     </p>
                   )}
-                  <p className="font-semibold text-gray-800 mt-0.5">{member.company}</p>
-                  <p className="text-gray-600 mt-0.5 font-medium">{member.mobile}</p>
-                  <p className="text-gray-500 mt-0.5 leading-normal">{member.address}</p>
+                  <p className="font-semibold text-gray-800">{member.company}</p>
+                  <p
+                    className="text-gray-500 leading-snug text-[11px] line-clamp-2 overflow-hidden text-ellipsis"
+                    style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}
+                  >
+                    {member.address}
+                  </p>
                 </div>
 
               </div>

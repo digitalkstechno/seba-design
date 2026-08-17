@@ -28,7 +28,7 @@ const AssociationCard: FC<AssociationCardProps> = ({ name, shortName, img }) => 
   }, [img]);
 
   return (
-    <div className="relative flex items-center w-full my-4 group transition-transform hover:scale-[1.01]">
+    <div className="relative flex items-center w-full group transition-transform hover:scale-[1.01]">
       {/* Left Circular Logo Badge */}
       <div className="w-[58px] h-[58px] rounded-full bg-white shadow-md flex items-center justify-center overflow-hidden p-1 shrink-0 z-30 relative">
         <img

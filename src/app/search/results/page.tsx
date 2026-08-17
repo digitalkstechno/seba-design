@@ -51,7 +51,7 @@ const ResultsContent: FC = () => {
           localStorage.removeItem('seba:navigatedToCard');
           setRefreshTrigger(prev => prev + 1);
         }
-      } catch (e) {}
+      } catch (e) { }
     };
 
     checkAndFetch();
@@ -89,8 +89,9 @@ const ResultsContent: FC = () => {
 
         const { data } = await api.get(query)
         if (data.status === 'Success') {
-          setMembers(data.data.map((item: any) => ({
-            id: item.memberId,
+          const filtered = data.data
+          setMembers(filtered.map((item: any) => ({
+            id: item.memberId || item._id,
             name: item.name,
             company: item.company,
             isCompany: Boolean(item.isCompany),
@@ -107,15 +108,14 @@ const ResultsContent: FC = () => {
             nfcCardStatus: item.nfcCardStatus || 'active',
             isSponsorNfc: Boolean(item.isSponsorNfc),
             cardId: item.cardId,
-            status: item.status
           })).sort((a: any, b: any) => {
             const getSortRank = (m: any) => {
               const isComp = Boolean(m.isCompany);
               const hasNfc = Boolean((m.hasNfcCard || m.isSponsorNfc) && m.nfcCardStatus !== 'inactive');
-              if (isComp && hasNfc) return 1;    // 1: Company WITH NFC
-              if (!isComp && hasNfc) return 2;   // 2: Member WITH NFC
+              if (isComp && hasNfc) return 1;    // 1: Company WITH NFC (Yellow Arrow)
+              if (!isComp && hasNfc) return 2;   // 2: Member WITH NFC (Red Arrow)
               if (isComp && !hasNfc) return 3;   // 3: Company WITHOUT NFC
-              return 4;                          // 4: Member WITHOUT NFC
+              return 4;                          // 4: Member WITHOUT NFC (including no SEBA number)
             };
 
             const rankA = getSortRank(a);
@@ -123,7 +123,7 @@ const ResultsContent: FC = () => {
             if (rankA !== rankB) {
               return rankA - rankB;
             }
-            return (a.name || "").localeCompare(b.name || "");
+            return (a.name || "").trim().localeCompare((b.name || "").trim(), undefined, { sensitivity: 'base' });
           }))
         }
       } catch (err) {
@@ -201,7 +201,10 @@ const ResultsContent: FC = () => {
                         {member.company}
                       </p>
                     </div>
-                    <p className="text-[10px] font-semibold truncate text-gray-500 mt-0.5 italic leading-tight pr-6">
+                    <p
+                      className="text-[10px] font-semibold text-gray-500 mt-0.5 italic leading-tight pr-6 line-clamp-2 overflow-hidden text-ellipsis"
+                      style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}
+                    >
                       {[member.address, member.area, member.city, member.state, member.pincode].filter(Boolean).join(', ')}
                     </p>
                   </div>
