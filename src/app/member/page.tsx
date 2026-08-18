@@ -14,6 +14,7 @@ import { cleanPhoneNumber } from "@/lib/phoneUtils"
 // Types
 type MemberType = {
   id: string
+  sebaNo?: string
   name: string
   category: string
   subCategory?: string
@@ -89,7 +90,7 @@ const MemberContent: FC = () => {
   useEffect(() => {
     const fetchMembers = async () => {
       try {
-        let query = `/seba/member?status=active&search=${searchTerm}`
+        let query = `/seba/member?search=${encodeURIComponent(searchTerm)}`
         if (urlCategory) query += `&category=${encodeURIComponent(urlCategory)}`
         if (urlSubCategory) query += `&subCategory=${encodeURIComponent(urlSubCategory)}`
         if (urlArea) query += `&area=${encodeURIComponent(urlArea)}`

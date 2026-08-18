@@ -29,9 +29,9 @@ const MultiSearch: FC = () => {
     const fetchMembers = async () => {
       setLoading(true)
       try {
-        let query = `/seba/member?status=active`
+        let query = `/seba/member?`
         if (searchTerm.trim()) {
-          query += `&search=${encodeURIComponent(searchTerm.trim())}`
+          query += `search=${encodeURIComponent(searchTerm.trim())}`
         }
 
         const { data } = await api.get(query)
@@ -142,7 +142,7 @@ const MultiSearch: FC = () => {
             </div>
           ) : members.length === 0 ? (
             <div className="flex justify-center py-10">
-              <p className="text-gray-400 italic text-sm">No active SEBA members found.</p>
+              <p className="text-gray-400 italic text-sm">No SEBA members found.</p>
             </div>
           ) : (
             members.map((item) => {

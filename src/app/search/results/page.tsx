@@ -82,10 +82,10 @@ const ResultsContent: FC = () => {
   useEffect(() => {
     const fetchMembers = async () => {
       try {
-        let query = `/seba/member?status=active&`
+        let query = `/seba/member?`
         if (urlCategory) query += `category=${encodeURIComponent(urlCategory)}&`
         if (urlSubCategory) query += `subCategory=${encodeURIComponent(urlSubCategory)}&`
-        if (urlArea && urlArea !== "All Area") query += `area=${encodeURIComponent(urlArea)}`
+        if (urlArea && urlArea !== "All Area") query += `area=${encodeURIComponent(urlArea)}&`
 
         const { data } = await api.get(query)
         if (data.status === 'Success') {

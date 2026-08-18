@@ -85,8 +85,8 @@ const Search = () => {
                     setCategories(catRes.data.data);
                 }
 
-                // Fetch members for areas (areas are still dynamic based on existing members)
-                const memberRes = await api.get('/seba/member?status=active');
+                // Fetch members for areas (areas are dynamic based on members)
+                const memberRes = await api.get('/seba/member');
                 if (memberRes.data.status === 'Success') {
                     const ars = Array.from(new Set(memberRes.data.data.map((m: any) => m.area).filter(Boolean))) as string[];
                     setAreas(ars);
