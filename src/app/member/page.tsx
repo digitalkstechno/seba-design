@@ -9,7 +9,7 @@ import { IoIosArrowBack } from "react-icons/io"
 import { FaSearch } from "react-icons/fa"
 import Footer from "@/components/Footer"
 import { getCookie, setCookie, deleteCookie } from "@/lib/cookies"
-import { cleanPhoneNumber } from "@/lib/phoneUtils"
+import { formatPhoneNumber, cleanPhoneNumber } from "@/lib/phoneUtils"
 
 // Types
 type MemberType = {
@@ -43,6 +43,28 @@ const formatDateOfBirth = (dobStr?: string) => {
   } catch (e) {
     return dobStr;
   }
+};
+
+const getContactInfo = (emailWebsite?: string, mobile?: string) => {
+  const email = (emailWebsite || "").trim();
+  let mobileFormatted = "";
+  if (mobile) {
+    const formatted = formatPhoneNumber(mobile);
+    if (formatted && formatted !== "+91 ") {
+      mobileFormatted = `m: ${formatted}`;
+    }
+  }
+
+  if (email && mobileFormatted) {
+    return `${email} | ${mobileFormatted}`;
+  }
+  if (email) {
+    return email;
+  }
+  if (mobileFormatted) {
+    return mobileFormatted;
+  }
+  return "www.website / email :";
 };
 
 const MemberContent: FC = () => {
@@ -123,6 +145,7 @@ const MemberContent: FC = () => {
             address: item.address,
             image: item.image ? `${process.env.NEXT_PUBLIC_IMAGE_URL}/builder/${item.image}` : "/images/member.webp",
             dob: item.dob || "N/A",
+            emailWebsite: item.emailWebsite || "",
           })).sort((a: any, b: any) => (a.name || "").trim().localeCompare((b.name || "").trim(), undefined, { sensitivity: 'base' })))
         }
       } catch (err: any) {
@@ -216,8 +239,8 @@ const MemberContent: FC = () => {
 
               </div>
 
-              <div className="bg-[#015d82] text-white text-center text-[12px] py-1">
-                {member.emailWebsite || "www.website / email :"}
+              <div className="bg-[#015d82] text-white text-center text-[12px] py-1 px-2 truncate">
+                {getContactInfo(member.emailWebsite, member.mobile)}
               </div>
 
             </div>

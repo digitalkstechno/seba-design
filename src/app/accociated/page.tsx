@@ -17,9 +17,7 @@ type AssociationCardProps = Association
 
 // Components
 const AssociationCard: FC<AssociationCardProps> = ({ name, shortName, img }) => {
-  const displayShortName = shortName
-    ? (shortName.includes('-') ? shortName : `${shortName} - Surat`)
-    : `${name} - Surat`;
+  const displayShortName = shortName || name;
 
   const [imgSrc, setImgSrc] = useState(img);
 
@@ -48,9 +46,9 @@ const AssociationCard: FC<AssociationCardProps> = ({ name, shortName, img }) => 
             clipPath: "polygon(0 0, calc(100% - 25px) 0, 100% 50%, calc(100% - 25px) 100%, 0 100%)",
           }}
         >
-          {/* Full Name in Serif Italic */}
+          {/* Short Name in Serif Italic */}
           <p className="font-serif italic text-[16px] text-white/95 leading-tight truncate pr-2">
-            {name}
+            {displayShortName}
           </p>
         </div>
 

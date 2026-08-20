@@ -141,9 +141,9 @@ const ResultsContent: FC = () => {
 
         {/* Header */}
         <div className="flex items-center gap-2 mb-3 cursor-pointer" onClick={() => router.push('/search')}>
-          <IoIosArrowBack className="text-gray-700 text-lg" />
-          <h1 className="text-base font-bold text-gray-900 tracking-wide uppercase">
-            SEBA MEMBERS
+          <IoIosArrowBack className="text-gray-700 text-lg shrink-0" />
+          <h1 className="text-base font-bold text-gray-900 tracking-wide uppercase truncate">
+            {[urlCategory, urlSubCategory].filter(Boolean).join(" - ") || 'Category'}
           </h1>
         </div>
 
