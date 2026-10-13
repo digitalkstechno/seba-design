@@ -40,6 +40,7 @@ const ResultsContent: FC = () => {
 
   const [members, setMembers] = useState<Member[]>([])
   const [loading, setLoading] = useState(true)
+  const [searchTerm, setSearchTerm] = useState("")
 
   const [refreshTrigger, setRefreshTrigger] = useState(0)
 
@@ -133,7 +134,7 @@ const ResultsContent: FC = () => {
       }
     }
     fetchMembers()
-  }, [urlCategory, urlSubCategory, urlArea, refreshTrigger])
+  }, [urlCategory, urlSubCategory, urlArea, refreshTrigger, searchTerm])
 
   return (
     <div className="min-h-[100vh] bg-[#d9d9d9] flex flex-col items-center justify-center overflow-hidden">
@@ -147,13 +148,16 @@ const ResultsContent: FC = () => {
           </h1>
         </div>
 
-        {/* Info Banner */}
-        <div className="px-1 mb-3 flex justify-center">
-          <img
-            src="/images/text-01.png"
-            alt="Alphabetically NFC card holder name come first"
-            className="w-full h-auto object-contain"
+        {/* Search Bar */}
+        <div className="mb-3 flex items-center bg-white rounded-full px-4 py-2.5 border border-gray-300 shadow-sm mx-1">
+          <input
+            type="text"
+            placeholder="Search by Name or Company..."
+            className="flex-1 bg-transparent outline-none text-[13px] text-gray-800"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
           />
+          <svg className="w-4 h-4 text-gray-500 shrink-0 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
         </div>
 
         {/* List */}

@@ -110,7 +110,7 @@ const HomeContent = () => {
   };
 
   const handleMenuClick = async (item: any) => {
-    if (item.label === "Members" || item.label === "Events") {
+    if (item.label === "Members") {
       await checkMemberAuthAndNavigate(item.path);
       return;
     }
@@ -236,7 +236,7 @@ const HomeContent = () => {
             </a>
             {/* events */}
             <div 
-              onClick={() => checkMemberAuthAndNavigate('/events')}
+              onClick={() => router.push('/events')}
               className="relative flex items-center bg-[#00a859] hover:bg-[#009650] h-[28px] pl-[32px] pr-4 rounded-l-full shadow-md transform -rotate-[12deg] origin-right transition-transform hover:-translate-x-1 cursor-pointer"
             >
               <div className="absolute left-[-2px] top-1/2 -translate-y-1/2 bg-black rounded-full w-[30px] h-[30px] flex items-center justify-center shadow-sm border border-yellow-500/25">

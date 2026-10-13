@@ -127,7 +127,7 @@ const MemberContent: FC = () => {
             return "";
           };
 
-          const filtered = data.data.filter((item: any) => Boolean(getSebaNo(item)));
+          const filtered = data.data;
 
           setMembers(filtered.map((item: any) => ({
             id: item.memberId || item._id,
@@ -147,7 +147,19 @@ const MemberContent: FC = () => {
             image: item.image ? `${process.env.NEXT_PUBLIC_IMAGE_URL}/builder/${item.image}` : "/images/member.webp",
             dob: item.dob || "N/A",
             emailWebsite: item.emailWebsite || "",
-          })).sort((a: any, b: any) => (a.name || "").trim().localeCompare((b.name || "").trim(), undefined, { sensitivity: 'base' })))
+          })).sort((a: any, b: any) => {
+            const term = searchTerm.toLowerCase().trim();
+            if (term.startsWith('seba')) {
+              const aSeba = a.sebaNo || "";
+              const bSeba = b.sebaNo || "";
+              if (aSeba && bSeba) {
+                return aSeba.localeCompare(bSeba, undefined, { numeric: true });
+              }
+              if (aSeba) return -1;
+              if (bSeba) return 1;
+            }
+            return (a.name || "").trim().localeCompare((b.name || "").trim(), undefined, { sensitivity: 'base' });
+          }))
         }
       } catch (err: any) {
         if (err.response?.status === 401 || err.response?.data?.message?.toLowerCase().includes("inactive")) {

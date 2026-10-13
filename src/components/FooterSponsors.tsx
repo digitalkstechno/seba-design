@@ -9,6 +9,10 @@ const FooterSponsors = ({ type }: { type?: 'sponsor' | 'co-sponsor' }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedAd, setSelectedAd] = useState<{ image: string, cardId?: string } | null>(null);
 
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  const minSwipeDistance = 50;
+
   useEffect(() => {
     const fetchSponsors = async () => {
       try {
@@ -84,13 +88,34 @@ const FooterSponsors = ({ type }: { type?: 'sponsor' | 'co-sponsor' }) => {
     setCurrentIndex(prev => (prev + 1) % activeSponsors.length);
   };
 
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEndHandler = () => {
+    if (!touchStart || !touchEnd) return;
+    const distance = touchStart - touchEnd;
+    if (distance > minSwipeDistance) handleNext();
+    if (distance < -minSwipeDistance) handlePrev();
+  };
+
   return (
-    <div className="mt-auto mb-3 pb-1">
+    <div className="mt-auto mb-[90px] pb-1">
       <p className="text-center text-[12px] text-gray-800 font-bold italic mb-2 tracking-tight">
         :: {isCoSponsor ? "Co-Sponsored by" : label} ::
       </p>
       
-      <div className="relative w-full flex justify-center items-center overflow-hidden">
+      <div 
+        className="relative w-full flex justify-center items-center overflow-hidden"
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEndHandler}
+      >
         <img
           key={activeSponsor._id || safeIndex}
           src={`${process.env.NEXT_PUBLIC_IMAGE_URL}/builder/${activeSponsor.image}`}
