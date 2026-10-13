@@ -2,16 +2,23 @@
 
 import { useEffect, useState } from "react";
 import api from "@/lib/axios";
-import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 
-const FooterSponsors = ({ type }: { type?: 'sponsor' | 'co-sponsor' }) => {
+interface FooterSponsorsProps {
+  type?: 'sponsor' | 'co-sponsor';
+  className?: string;
+}
+
+const FooterSponsors = ({ type, className = "" }: FooterSponsorsProps) => {
   const [sponsors, setSponsors] = useState<any[]>([]);
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState(1);
+  const [withTransition, setWithTransition] = useState(true);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragOffset, setDragOffset] = useState(0);
+  const [startX, setStartX] = useState(0);
+  const [startY, setStartY] = useState(0);
+  const [hasMoved, setHasMoved] = useState(false);
+  const [isScrolling, setIsScrolling] = useState<boolean | null>(null);
   const [selectedAd, setSelectedAd] = useState<{ image: string, cardId?: string } | null>(null);
-
-  const [touchStart, setTouchStart] = useState<number | null>(null);
-  const [touchEnd, setTouchEnd] = useState<number | null>(null);
-  const minSwipeDistance = 50;
 
   useEffect(() => {
     const fetchSponsors = async () => {
@@ -30,7 +37,6 @@ const FooterSponsors = ({ type }: { type?: 'sponsor' | 'co-sponsor' }) => {
   const mainSponsors = sponsors.filter(s => s.type === 'sponsor');
   const coSponsors = sponsors.filter(s => s.type === 'co-sponsor');
 
-  // Logic based on prop
   let activeSponsors: any[] = [];
   let label = "";
 
@@ -41,21 +47,54 @@ const FooterSponsors = ({ type }: { type?: 'sponsor' | 'co-sponsor' }) => {
     activeSponsors = coSponsors;
     label = "Co-Sponsor";
   } else {
-    // Default priority logic for Home if no type specified (or explicitly for Home)
     activeSponsors = mainSponsors.length > 0 ? mainSponsors : coSponsors;
     label = mainSponsors.length > 0 ? "Sponsor" : "Co-Sponsor";
   }
 
+  const isCoSponsor = label === "Co-Sponsor";
+  const hasMultiple = activeSponsors.length > 1;
+
+  // Extended sponsors array with circular clones for infinite sliding
+  const extendedSponsors = hasMultiple
+    ? [activeSponsors[activeSponsors.length - 1], ...activeSponsors, activeSponsors[0]]
+    : activeSponsors;
+
+  // Reset index to 1 when sponsors list changes
   useEffect(() => {
-    if (activeSponsors.length <= 1) return;
-    
-    // Increased timing to 4 seconds
-    const interval = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % activeSponsors.length);
+    if (hasMultiple) {
+      setCurrentIndex(1);
+      setWithTransition(false);
+    } else {
+      setCurrentIndex(0);
+    }
+  }, [activeSponsors.length, hasMultiple]);
+
+  // Auto-slide every 4 seconds when not dragging
+  useEffect(() => {
+    if (!hasMultiple || isDragging) return;
+
+    const timer = setInterval(() => {
+      setWithTransition(true);
+      setCurrentIndex(prev => prev + 1);
     }, 4000);
-    
-    return () => clearInterval(interval);
-  }, [activeSponsors.length]);
+
+    return () => clearInterval(timer);
+  }, [hasMultiple, isDragging, currentIndex]);
+
+  // Handle circular jump when transition ends
+  const handleTransitionEnd = () => {
+    if (!hasMultiple) return;
+
+    if (currentIndex === 0) {
+      // Reached leading clone -> jump to actual last item seamlessly
+      setWithTransition(false);
+      setCurrentIndex(activeSponsors.length);
+    } else if (currentIndex === extendedSponsors.length - 1) {
+      // Reached trailing clone -> jump to actual first item seamlessly
+      setWithTransition(false);
+      setCurrentIndex(1);
+    }
+  };
 
   // Ensure modal is closed if user navigates away (fixes BFCache blank screen issue)
   useEffect(() => {
@@ -65,7 +104,6 @@ const FooterSponsors = ({ type }: { type?: 'sponsor' | 'co-sponsor' }) => {
       }
     };
     document.addEventListener('visibilitychange', handleVisibilityChange);
-    // Also listen for popstate just in case
     window.addEventListener('popstate', handleVisibilityChange);
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
@@ -75,76 +113,138 @@ const FooterSponsors = ({ type }: { type?: 'sponsor' | 'co-sponsor' }) => {
 
   if (activeSponsors.length === 0) return null;
 
-  // Ensure index is within bounds (in case arrays change)
-  const safeIndex = currentIndex % activeSponsors.length;
-  const activeSponsor = activeSponsors[safeIndex];
-  const isCoSponsor = label === "Co-Sponsor";
+  const handleTouchStart = (e: React.TouchEvent | React.MouseEvent) => {
+    if (!hasMultiple) return;
+    setWithTransition(false);
+    setIsDragging(true);
+    setHasMoved(false);
+    setIsScrolling(null);
+    setDragOffset(0);
 
-  const handlePrev = () => {
-    setCurrentIndex(prev => (prev - 1 + activeSponsors.length) % activeSponsors.length);
+    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+    setStartX(clientX);
+    setStartY(clientY);
   };
 
-  const handleNext = () => {
-    setCurrentIndex(prev => (prev + 1) % activeSponsors.length);
+  const handleTouchMove = (e: React.TouchEvent | React.MouseEvent) => {
+    if (!isDragging) return;
+
+    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+    const diffX = clientX - startX;
+    const diffY = clientY - startY;
+
+    if (isScrolling === null && 'touches' in e) {
+      if (Math.abs(diffY) > Math.abs(diffX) && Math.abs(diffY) > 6) {
+        setIsScrolling(true);
+        setIsDragging(false);
+        setDragOffset(0);
+        return;
+      } else if (Math.abs(diffX) > 6) {
+        setIsScrolling(false);
+      }
+    }
+
+    if (isScrolling === true) return;
+
+    if (Math.abs(diffX) > 6) {
+      setHasMoved(true);
+    }
+
+    setDragOffset(diffX);
   };
 
-  const onTouchStart = (e: React.TouchEvent) => {
-    setTouchEnd(null);
-    setTouchStart(e.targetTouches[0].clientX);
-  };
+  const handleTouchEnd = () => {
+    if (!isDragging) return;
+    setIsDragging(false);
 
-  const onTouchMove = (e: React.TouchEvent) => {
-    setTouchEnd(e.targetTouches[0].clientX);
-  };
+    const threshold = 40;
 
-  const onTouchEndHandler = () => {
-    if (!touchStart || !touchEnd) return;
-    const distance = touchStart - touchEnd;
-    if (distance > minSwipeDistance) handleNext();
-    if (distance < -minSwipeDistance) handlePrev();
+    if (dragOffset < -threshold) {
+      // Swiped left -> Next sponsor
+      setWithTransition(true);
+      setCurrentIndex(prev => prev + 1);
+    } else if (dragOffset > threshold) {
+      // Swiped right -> Previous sponsor
+      setWithTransition(true);
+      setCurrentIndex(prev => prev - 1);
+    } else {
+      // Snap back to current sponsor
+      setWithTransition(true);
+    }
+
+    setDragOffset(0);
   };
 
   return (
-    <div className="mt-auto mb-[90px] pb-1">
+    <div className={`mt-auto mb-8 ${className}`}>
       <p className="text-center text-[12px] text-gray-800 font-bold italic mb-2 tracking-tight">
         :: {isCoSponsor ? "Co-Sponsored by" : label} ::
       </p>
-      
-      <div 
-        className="relative w-full flex justify-center items-center overflow-hidden"
-        onTouchStart={onTouchStart}
-        onTouchMove={onTouchMove}
-        onTouchEnd={onTouchEndHandler}
+
+      {/* Smooth Touch Carousel Track */}
+      <div
+        className="relative w-full overflow-hidden select-none touch-pan-y cursor-grab active:cursor-grabbing"
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        onTouchCancel={handleTouchEnd}
+        onMouseDown={handleTouchStart}
+        onMouseMove={handleTouchMove}
+        onMouseUp={handleTouchEnd}
+        onMouseLeave={handleTouchEnd}
       >
-        <img
-          key={activeSponsor._id || safeIndex}
-          src={`${process.env.NEXT_PUBLIC_IMAGE_URL}/builder/${activeSponsor.image}`}
-          alt={label}
-          className={`w-full h-auto ${activeSponsor.adImage ? 'cursor-pointer' : ''}`}
-          onClick={() => {
-            if (activeSponsor.adImage) {
-              setSelectedAd({ image: activeSponsor.adImage, cardId: activeSponsor.cardId });
-            }
+        <div
+          className="flex w-full"
+          style={{
+            transform: hasMultiple
+              ? `translateX(calc(-${currentIndex * 100}% + ${dragOffset}px))`
+              : "none",
+            transition: withTransition
+              ? "transform 0.35s cubic-bezier(0.25, 1, 0.5, 1)"
+              : "none",
+            willChange: "transform",
           }}
-          style={{ animation: "fadeIn 0.5s ease-in-out" }}
-        />
-        <style jsx>{`
-          @keyframes fadeIn {
-            from { opacity: 0.8; }
-            to { opacity: 1; }
-          }
-        `}</style>
+          onTransitionEnd={handleTransitionEnd}
+        >
+          {extendedSponsors.map((sponsor, idx) => (
+            <div
+              key={`${sponsor._id || idx}-${idx}`}
+              className="w-full shrink-0 flex justify-center items-center"
+            >
+              <img
+                src={`${process.env.NEXT_PUBLIC_IMAGE_URL}/builder/${sponsor.image}`}
+                alt={label}
+                draggable={false}
+                className={`w-full h-auto select-none ${sponsor.adImage ? 'cursor-pointer' : ''}`}
+                onClick={(e) => {
+                  if (hasMoved) {
+                    e.preventDefault();
+                    return;
+                  }
+                  if (sponsor.adImage) {
+                    setSelectedAd({ image: sponsor.adImage, cardId: sponsor.cardId });
+                  }
+                }}
+              />
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Ad Modal */}
       {selectedAd && (
         <div className="fixed top-0 bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[420px] z-[100] bg-black/85 flex items-center justify-center p-4 shadow-2xl">
-          <button 
-            onClick={() => setSelectedAd(null)} 
-            className="absolute top-4 right-4 text-white hover:text-gray-300 z-[110] p-2 bg-black/50 rounded-full"
+          <button
+            onClick={() => setSelectedAd(null)}
+            className="absolute top-4 right-4 text-white hover:text-gray-300 z-[110] p-2 bg-black/50 rounded-full cursor-pointer"
             aria-label="Close Advertisement"
           >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
           </button>
           <a
             href={selectedAd.cardId ? `${process.env.NEXT_PUBLIC_CARD_URL}/${selectedAd.cardId}?view=home` : '#'}
@@ -155,8 +255,8 @@ const FooterSponsors = ({ type }: { type?: 'sponsor' | 'co-sponsor' }) => {
             }}
             className="contents"
           >
-            <img 
-              src={`${process.env.NEXT_PUBLIC_IMAGE_URL}/builder/${selectedAd.image}`} 
+            <img
+              src={`${process.env.NEXT_PUBLIC_IMAGE_URL}/builder/${selectedAd.image}`}
               alt="Advertisement"
               className={`max-w-full max-h-full rounded-lg shadow-2xl object-contain ${selectedAd.cardId ? 'cursor-pointer' : ''}`}
             />
