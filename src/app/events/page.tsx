@@ -47,8 +47,6 @@ const EventsPage: FC = () => {
   const [submitting, setSubmitting] = useState(false)
   const [successMsg, setSuccessMsg] = useState("")
   const [errorMsg, setErrorMsg] = useState("")
-  const [authChecking, setAuthChecking] = useState(true)
-  const [isAuthorized, setIsAuthorized] = useState(false)
 
   const fetchEventsAndMessages = async () => {
     setLoading(true)
@@ -72,51 +70,8 @@ const EventsPage: FC = () => {
   }
 
   useEffect(() => {
-    const checkAuthAndFetch = async () => {
-      let token = getCookie("seba_token");
-      if (!token) {
-        const mob = getCookie("seba_user_mobile");
-        const name = getCookie("seba_user_name");
-        if (mob) {
-          try {
-            const cleanMob = cleanPhoneNumber(mob);
-            const { data } = await api.post("/seba/user/login", { name: name || "", mobile: cleanMob });
-            if (data.status === "Success" && data.data?.token) {
-              setCookie("seba_token", data.data.token);
-              deleteCookie("seba_user_is_inactive");
-              token = data.data.token;
-            }
-          } catch (err: any) {
-            if (err.response?.data?.message?.toLowerCase().includes("inactive")) {
-              setCookie("seba_user_is_inactive", "true");
-            }
-          }
-        }
-      }
-
-      if (!token) {
-        router.replace("/home?restricted=true");
-        return;
-      }
-
-      setIsAuthorized(true);
-      setAuthChecking(false);
-
-      fetchEventsAndMessages();
-    };
-
-    checkAuthAndFetch();
-  }, [router]);
-
-  if (authChecking || !isAuthorized) {
-    return (
-      <div className="min-h-[100vh] bg-[#d9d9d9] flex flex-col items-center justify-center overflow-hidden">
-        <div className="w-full max-w-[420px] h-[100vh] bg-[#f8f9fa] relative px-4 pt-4 shadow-2xl flex flex-col items-center justify-center border border-gray-200">
-          <p className="text-gray-400 italic text-sm">Verifying membership...</p>
-        </div>
-      </div>
-    );
-  }
+    fetchEventsAndMessages();
+  }, []);
 
   const handlePasswordVerify = (e: React.FormEvent) => {
     e.preventDefault()
